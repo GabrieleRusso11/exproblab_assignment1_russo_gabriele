@@ -63,9 +63,12 @@ ACTION_CONTROLLER = 'motion/controller'
 # It should be a list `[min_time, max_time]`, and the time to reach a
 # via point will be a random number of seconds in such an interval.
 PARAM_CONTROLLER_TIME = 'test/random_motion_time'
+
 # -------------------------------------------------
 
 NODE_STATEMACHINE = 'state-machine'
+
+SERVER_CHARGING = 'inteface/start_charging' 
 
 
 # Function used to label each log with a producer tag.
