@@ -22,7 +22,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-# catkin_python_setup()
+catkin_python_setup()
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -59,6 +59,7 @@ find_package(catkin REQUIRED COMPONENTS
    FILES
    ActualPosition.srv
    NewPosition.srv
+   StartCharging.srv
  )
 
 ## Generate actions in the 'action' folder
@@ -106,7 +107,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES exproblab_assignment1_russo_gabriele
+   LIBRARIES exproblab_assignment1_russo_gabriele
 #  CATKIN_DEPENDS rospy std_msgs
    CATKIN_DEPENDS message_runtime
 #  DEPENDS system_lib
@@ -167,7 +168,8 @@ include_directories(
    scripts/controller.py
    scripts/planner.py
    scripts/state_machine.py
-   scripts/sm_interface.py
+   utilities/exproblab_assignment1_russo_gabriele/state_machine_interface.py
+   utilities/exproblab_assignment1_russo_gabriele/architecture_names.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 
