@@ -1,0 +1,11 @@
+####### The service to start the battery charging
+
+### Request
+
+# start battery charging.
+
+bool start
+
+---
+
+### Response

@@ -8,4 +8,4 @@
 
 # The current robot position.
 
-string position 
+Location position 
