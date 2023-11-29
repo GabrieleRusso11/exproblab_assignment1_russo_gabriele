@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>exproblab_assignment1_russo_gabriele.architecture_names &mdash; ExpRobLab assignment 1 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=73cda6fb"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ExpRobLab assignment 1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">exproblab_assignment1_russo_gabriele</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ExpRobLab assignment 1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">exproblab_assignment1_russo_gabriele.architecture_names</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for exproblab_assignment1_russo_gabriele.architecture_names</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. module:: architecture_names</span>
+<span class="sd">   :platform: Ubuntu 20.04</span>
+<span class="sd">   :synopsis: Python module which implements a &#39;dictionary&#39; that defines names and a function for logging in the architecture.</span>
+
+<span class="sd">.. moduleauthor:: Gabriele Russo &lt;gabriele.russo117@gmail.com&gt;</span>
+
+<span class="sd">it implements a &#39;dictionary&#39; that defines names and a function for logging used among all the components of the architecture of this assignment.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">rospy</span>
+
+<span class="c1"># ---------------------------------------------------------</span>
+
+<span class="c1"># The name of the robot state node which represent the shared knowledge.</span>
+<span class="n">NODE_ROBOT_STATE</span> <span class="o">=</span> <span class="s1">&#39;robot-state&#39;</span>
+
+<span class="c1"># The name of the server to get the actual robot position.</span>
+<span class="n">SERVER_GET_POSE</span> <span class="o">=</span> <span class="s1">&#39;state/get_pose&#39;</span>
+
+<span class="c1"># The name of the server to set the actual robot position. </span>
+<span class="n">SERVER_SET_POSE</span> <span class="o">=</span> <span class="s1">&#39;state/set_pose&#39;</span>
+
+<span class="c1"># The name of the topic where the battery state is published.</span>
+<span class="n">TOPIC_BATTERY_LOW</span> <span class="o">=</span> <span class="s1">&#39;state/battery_low&#39;</span>
+
+<span class="c1"># ---------------------------------------------------------</span>
+
+<span class="c1"># The name of the planner node.</span>
+<span class="n">NODE_PLANNER</span> <span class="o">=</span> <span class="s1">&#39;planner&#39;</span>
+
+<span class="c1"># The name of the action server solving the motion planning problem.</span>
+<span class="n">ACTION_PLANNER</span> <span class="o">=</span> <span class="s1">&#39;motion/planner&#39;</span>
+
+<span class="c1"># -------------------------------------------------</span>
+
+<span class="c1"># The name of the controller node.</span>
+<span class="n">NODE_CONTROLLER</span> <span class="o">=</span> <span class="s1">&#39;controller&#39;</span>
+
+<span class="c1"># The name of the action server solving the motion control problem.</span>
+<span class="n">ACTION_CONTROLLER</span> <span class="o">=</span> <span class="s1">&#39;motion/controller&#39;</span>
+
+<span class="c1"># -------------------------------------------------</span>
+
+<span class="c1"># the name of the state machine node</span>
+<span class="n">NODE_STATEMACHINE</span> <span class="o">=</span> <span class="s1">&#39;state-machine&#39;</span>
+
+<span class="c1"># the name of the server used to start the robot charging process</span>
+<span class="n">SERVER_CHARGING</span> <span class="o">=</span> <span class="s1">&#39;inteface/start_charging&#39;</span> 
+
+
+<span class="c1"># Function used to label each log with a producer tag.</span>
+<div class="viewcode-block" id="tag_log"><a class="viewcode-back" href="../../exproblab_assignment1_russo_gabriele.html#exproblab_assignment1_russo_gabriele.architecture_names.tag_log">[docs]</a><span class="k">def</span> <span class="nf">tag_log</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">producer_tag</span><span class="p">):</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;@</span><span class="si">{</span><span class="n">producer_tag</span><span class="si">}</span><span class="s1">&gt;&gt; </span><span class="si">{</span><span class="n">msg</span><span class="si">}</span><span class="s1">&#39;</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Gabriele Russo.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scripts.controller &mdash; ExpRobLab assignment 1 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=73cda6fb"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ExpRobLab assignment 1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ExpRobLab assignment 1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">scripts.controller</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scripts.controller</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. module:: controller</span>
+<span class="sd">  :platform: Ubuntu 20.04</span>
+<span class="sd">  :synopsis: Python module to simulate the motion of the robot towards the target location</span>
+
+<span class="sd">.. moduleauthor:: Gabriele Russo &lt;gabriele.russo117@gmail.com&gt;</span>
+
+<span class="sd">This node implements an Action server that receives the path plan from the State Machine node</span>
+<span class="sd">(obtained by the planner node) and simulates the robot motion from the current position </span>
+<span class="sd">into the target position. Then it returns, as result, the final location reached by the robot,</span>
+<span class="sd">to the Action Client which is the State Machine node.</span>
+
+<span class="sd">ROS Parameters:</span>
+<span class="sd">  **/moving_time** the waiting time used to simulate the robot motion. \n</span>
+
+<span class="sd">Service:</span>
+<span class="sd">  **/state/set_pose** set the new robot position in the Robot State node. \n</span>
+
+<span class="sd">Action Server:</span>
+<span class="sd">  **/motion/controller** given the path plan as a goal, simulate the robot motion in order to reach the final position. \n</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">rospy</span>
+
+<span class="c1"># Import constant name defined to structure the architecture.</span>
+<span class="kn">from</span> <span class="nn">exproblab_assignment1_russo_gabriele</span> <span class="kn">import</span> <span class="n">architecture_names</span> <span class="k">as</span> <span class="n">anm</span>
+
+<span class="c1"># Import the simple ActionServer.</span>
+<span class="kn">from</span> <span class="nn">actionlib</span> <span class="kn">import</span> <span class="n">SimpleActionServer</span>
+
+<span class="c1"># Import custom message, actions and services.</span>
+<span class="kn">from</span> <span class="nn">exproblab_assignment1_russo_gabriele.msg</span> <span class="kn">import</span> <span class="n">ControlFeedback</span><span class="p">,</span> <span class="n">ControlResult</span>
+<span class="kn">from</span> <span class="nn">exproblab_assignment1_russo_gabriele.srv</span> <span class="kn">import</span> <span class="n">NewPosition</span>
+<span class="kn">import</span> <span class="nn">exproblab_assignment1_russo_gabriele</span> <span class="c1"># This is required to pass the `ControlAction` type for </span>
+                                            <span class="c1"># instantiating the `SimpleActionServer`.</span>
+
+<span class="c1"># used to color the output text</span>
+<span class="kn">import</span> <span class="nn">colorama</span>
+<span class="kn">from</span> <span class="nn">colorama</span> <span class="kn">import</span> <span class="n">Fore</span>
+
+<span class="c1"># A tag for identifying logs producer.</span>
+<span class="n">LOG_TAG</span> <span class="o">=</span> <span class="n">anm</span><span class="o">.</span><span class="n">NODE_CONTROLLER</span>
+
+
+
+<div class="viewcode-block" id="ControllingAction"><a class="viewcode-back" href="../../index.html#scripts.controller.ControllingAction">[docs]</a><span class="k">class</span> <span class="nc">ControllingAction</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class represents the controller and its /motion/controller</span>
+<span class="sd">    Action server used to simulate motion controlling.</span>
+<span class="sd">    Given a plan as a list of locations, it simulates, through a waiting time,</span>
+<span class="sd">    the robot motion to reach each location in the plan. Then it updates</span>
+<span class="sd">    the current robot position stored in the &#39;robot-state&#39; node.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the moving time, used to simulate the motion time,</span>
+<span class="sd">        from the parameter server, define the action server and starts it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get the delay ros parameter used by this server</span>
+        <span class="c1"># to simulate the movements</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delay</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s2">&quot;/moving_time&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Instantiate and start the action server based on the `SimpleActionServer` class.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_as</span> <span class="o">=</span> <span class="n">SimpleActionServer</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">ACTION_CONTROLLER</span><span class="p">,</span>
+                                      <span class="n">exproblab_assignment1_russo_gabriele</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">ControlAction</span><span class="p">,</span>
+                                      <span class="n">execute_cb</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">execute_callback</span><span class="p">,</span>
+                                      <span class="n">auto_start</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_as</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="c1"># Log information.</span>
+        <span class="n">log_msg</span> <span class="o">=</span> <span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTCYAN_EX</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;`</span><span class="si">{</span><span class="n">anm</span><span class="o">.</span><span class="n">ACTION_CONTROLLER</span><span class="si">}</span><span class="s1">` Action Server initialised.&#39;</span><span class="p">)</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">log_msg</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ControllingAction.execute_callback"><a class="viewcode-back" href="../../index.html#scripts.controller.ControllingAction.execute_callback">[docs]</a>    <span class="k">def</span> <span class="nf">execute_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The callback executed when the client set the goal to the &#39;controller&#39; server, </span>
+<span class="sd">        in this case the goal is the plan computed in the Planner node.</span>
+<span class="sd">        This function requires a list of Locations (i.e., the plan), and it simulates</span>
+<span class="sd">        a movement through each position using a delay.</span>
+<span class="sd">        Once a new position is reached, the related robot position is updated</span>
+<span class="sd">        in the `robot-state` node, through the /state/set_pose service.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          goal (ControlGoal): the plan, composed of a list of locations</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check if the provided plan is processable. If not, this service will be aborted.</span>
+        <span class="k">if</span> <span class="n">goal</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">goal</span><span class="o">.</span><span class="n">plan</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">goal</span><span class="o">.</span><span class="n">plan</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="s1">&#39;No locations provided! This service will be aborted!&#39;</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_as</span><span class="o">.</span><span class="n">set_aborted</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Construct the feedback and loop for each location.</span>
+        <span class="n">feedback</span> <span class="o">=</span> <span class="n">ControlFeedback</span><span class="p">()</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="s1">&#39;Server is controlling...&#39;</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">location</span> <span class="ow">in</span> <span class="n">goal</span><span class="o">.</span><span class="n">plan</span><span class="p">:</span>
+            <span class="c1"># Check that the client did not cancel this service.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_as</span><span class="o">.</span><span class="n">is_preempt_requested</span><span class="p">():</span>
+                <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="s1">&#39;Service has been cancelled by the client!&#39;</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+                <span class="c1"># Actually cancel this service.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_as</span><span class="o">.</span><span class="n">set_preempted</span><span class="p">()</span>
+                <span class="k">return</span>
+            
+            <span class="c1"># Wait before to reach the following position. This is just for testing purposes.</span>
+            <span class="n">delay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delay</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">delay</span><span class="p">)</span>
+
+            <span class="c1"># Publish a feedback to the client to simulate that the robot has reached the position. </span>
+            <span class="n">feedback</span><span class="o">.</span><span class="n">reached_location</span> <span class="o">=</span> <span class="n">location</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_as</span><span class="o">.</span><span class="n">publish_feedback</span><span class="p">(</span><span class="n">feedback</span><span class="p">)</span>
+
+            <span class="c1"># Set the new current position into the `robot-state` node.</span>
+            <span class="n">_set_client_position</span><span class="p">(</span><span class="n">location</span><span class="p">)</span>
+
+            <span class="c1"># Log current robot position.</span>
+            <span class="n">log_msg</span> <span class="o">=</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTCYAN_EX</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;Reaching location (</span><span class="si">{</span><span class="n">location</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">).&#39;</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">log_msg</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+        <span class="c1"># Publish the results to the client.</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">ControlResult</span><span class="p">()</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">final_location</span> <span class="o">=</span> <span class="n">feedback</span><span class="o">.</span><span class="n">reached_location</span>
+
+        <span class="n">log_msg</span> <span class="o">=</span> <span class="n">Fore</span><span class="o">.</span><span class="n">GREEN</span> <span class="o">+</span> <span class="s1">&#39;Motion control successes.&#39;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">log_msg</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+        <span class="c1"># Succeeded.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_as</span><span class="o">.</span><span class="n">set_succeeded</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="k">return</span>  </div></div>
+
+<div class="viewcode-block" id="_set_client_position"><a class="viewcode-back" href="../../index.html#scripts.controller._set_client_position">[docs]</a><span class="k">def</span> <span class="nf">_set_client_position</span><span class="p">(</span><span class="n">position</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update the current robot position stored in the `robot-state` node.</span>
+<span class="sd">    This method is performed for each position provided in the action&#39;s server feedback.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">      position (Location): the new robot position</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># wait for the server to be initialized.</span>
+    <span class="n">rospy</span><span class="o">.</span><span class="n">wait_for_service</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">SERVER_SET_POSE</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+
+        <span class="c1"># Log service call.</span>
+        <span class="n">log_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Set current robot position to the `</span><span class="si">{</span><span class="n">anm</span><span class="o">.</span><span class="n">SERVER_SET_POSE</span><span class="si">}</span><span class="s1">` node.&#39;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">log_msg</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span>
+
+        <span class="c1"># Call the service and set the current robot position.</span>
+        <span class="n">service</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">ServiceProxy</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">SERVER_SET_POSE</span><span class="p">,</span> <span class="n">NewPosition</span><span class="p">)</span>
+        <span class="n">service</span><span class="p">(</span><span class="n">position</span><span class="p">)</span>  <span class="c1"># The response is not used.</span>
+
+    <span class="k">except</span> <span class="n">rospy</span><span class="o">.</span><span class="n">ServiceException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+
+        <span class="n">log_msg</span> <span class="o">=</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;Server cannot set current robot position: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">log_msg</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1"># Initialize the node, its action server, and wait.   </span>
+    <span class="n">rospy</span><span class="o">.</span><span class="n">init_node</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">NODE_CONTROLLER</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">rospy</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="n">server</span> <span class="o">=</span> <span class="n">ControllingAction</span><span class="p">()</span>
+    <span class="n">rospy</span><span class="o">.</span><span class="n">spin</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Gabriele Russo.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

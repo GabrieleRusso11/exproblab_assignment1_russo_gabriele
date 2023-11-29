@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scripts &mdash; ExpRobLab assignment 1 2.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=73cda6fb"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="utilities" href="utilities.html" />
+    <link rel="prev" title="Experimental Robot Laboratory assignment 1 documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            ExpRobLab assignment 1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Scripts</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-scripts.controller">Controller Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.controller.ControllingAction"><code class="docutils literal notranslate"><span class="pre">ControllingAction</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scripts.controller.ControllingAction.execute_callback"><code class="docutils literal notranslate"><span class="pre">ControllingAction.execute_callback()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.controller._set_client_position"><code class="docutils literal notranslate"><span class="pre">_set_client_position()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scripts.planner">Planner Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.planner.PlaningAction"><code class="docutils literal notranslate"><span class="pre">PlaningAction</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scripts.planner.PlaningAction.execute_callback"><code class="docutils literal notranslate"><span class="pre">PlaningAction.execute_callback()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.planner._get_client_position"><code class="docutils literal notranslate"><span class="pre">_get_client_position()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scripts.robot_state">Robot State Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.robot_state.RobotState"><code class="docutils literal notranslate"><span class="pre">RobotState</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scripts.robot_state.RobotState._is_battery_low"><code class="docutils literal notranslate"><span class="pre">RobotState._is_battery_low()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scripts.robot_state.RobotState.get_position"><code class="docutils literal notranslate"><span class="pre">RobotState.get_position()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scripts.robot_state.RobotState.set_position"><code class="docutils literal notranslate"><span class="pre">RobotState.set_position()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scripts.robot_state.RobotState.start_charging"><code class="docutils literal notranslate"><span class="pre">RobotState.start_charging()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scripts.state_machine">State Machine Module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.state_machine.Moving"><code class="docutils literal notranslate"><span class="pre">Moving</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scripts.state_machine.Moving.execute"><code class="docutils literal notranslate"><span class="pre">Moving.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.state_machine.Planning"><code class="docutils literal notranslate"><span class="pre">Planning</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scripts.state_machine.Planning.execute"><code class="docutils literal notranslate"><span class="pre">Planning.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.state_machine.Recharging"><code class="docutils literal notranslate"><span class="pre">Recharging</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scripts.state_machine.Recharging.execute"><code class="docutils literal notranslate"><span class="pre">Recharging.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.state_machine.Wait"><code class="docutils literal notranslate"><span class="pre">Wait</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scripts.state_machine.Wait.execute"><code class="docutils literal notranslate"><span class="pre">Wait.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.state_machine.WaitForTopMap"><code class="docutils literal notranslate"><span class="pre">WaitForTopMap</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scripts.state_machine.WaitForTopMap.execute"><code class="docutils literal notranslate"><span class="pre">WaitForTopMap.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.state_machine.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utilities.html">utilities</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ExpRobLab assignment 1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Scripts</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/scripts.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="scripts">
+<h1>Scripts<a class="headerlink" href="#scripts" title="Permalink to this heading"></a></h1>
+<section id="module-scripts.controller">
+<span id="controller-module"></span><h2>Controller Module<a class="headerlink" href="#module-scripts.controller" title="Permalink to this heading"></a></h2>
+<span class="target" id="module-controller"></span><p>This node implements an Action server that receives the path plan from the State Machine node
+(obtained by the planner node) and simulates the robot motion from the current position
+into the target position. Then it returns, as result, the final location reached by the robot,
+to the Action Client which is the State Machine node.</p>
+<dl class="simple">
+<dt>ROS Parameters:</dt><dd><p><strong>/moving_time</strong> the waiting time used to simulate the robot motion.</p>
+</dd>
+<dt>Service:</dt><dd><p><strong>/state/set_pose</strong> set the new robot position in the Robot State node.</p>
+</dd>
+<dt>Action Server:</dt><dd><p><strong>/motion/controller</strong> given the path plan as a goal, simulate the robot motion in order to reach the final position.</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.controller.ControllingAction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.controller.</span></span><span class="sig-name descname"><span class="pre">ControllingAction</span></span><a class="reference internal" href="_modules/scripts/controller.html#ControllingAction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.controller.ControllingAction" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>This class represents the controller and its /motion/controller
+Action server used to simulate motion controlling.
+Given a plan as a list of locations, it simulates, through a waiting time,
+the robot motion to reach each location in the plan. Then it updates
+the current robot position stored in the ‘robot-state’ node.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.controller.ControllingAction.execute_callback">
+<span class="sig-name descname"><span class="pre">execute_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">goal</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/controller.html#ControllingAction.execute_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.controller.ControllingAction.execute_callback" title="Permalink to this definition"></a></dt>
+<dd><p>The callback executed when the client set the goal to the ‘controller’ server,
+in this case the goal is the plan computed in the Planner node.
+This function requires a list of Locations (i.e., the plan), and it simulates
+a movement through each position using a delay.
+Once a new position is reached, the related robot position is updated
+in the <cite>robot-state</cite> node, through the /state/set_pose service.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>goal</strong> (<em>ControlGoal</em>) – the plan, composed of a list of locations</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scripts.controller._set_client_position">
+<span class="sig-prename descclassname"><span class="pre">scripts.controller.</span></span><span class="sig-name descname"><span class="pre">_set_client_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">position</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/controller.html#_set_client_position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.controller._set_client_position" title="Permalink to this definition"></a></dt>
+<dd><p>Update the current robot position stored in the <cite>robot-state</cite> node.
+This method is performed for each position provided in the action’s server feedback.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>position</strong> (<em>Location</em>) – the new robot position</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-scripts.planner">
+<span id="planner-module"></span><h2>Planner Module<a class="headerlink" href="#module-scripts.planner" title="Permalink to this heading"></a></h2>
+<span class="target" id="module-planner"></span><p>This node implements an Action server that receives the target location from the State Machine node
+and the current robot position from the Robot-state node. Then it computes the path from the current
+position to the target position, and return, as result, the total plan to the Action Client which is
+the State Machine node.</p>
+<p>This is a simulated program, therefore the planner does not actually have to compute anything,
+it simulates work by busy waiting.</p>
+<dl class="simple">
+<dt>ROS Parameters:</dt><dd><p><strong>/planning_time</strong> the waiting time used to simulate the computation of the plan.</p>
+</dd>
+<dt>Service:</dt><dd><p><strong>/state/get_pose</strong> get from the Robot State node the current robot position.</p>
+</dd>
+<dt>Action Server:</dt><dd><p><strong>/motion/planner</strong> given a target location as a goal, computes the path in order to reach it.</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.planner.PlaningAction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.planner.</span></span><span class="sig-name descname"><span class="pre">PlaningAction</span></span><a class="reference internal" href="_modules/scripts/planner.html#PlaningAction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.planner.PlaningAction" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>This class represents the planner and its /motion/planner action server
+used to simulate the motion planning. Given a target position,
+it retrieve the current robot position from the <cite>robot-state</cite> node,
+and return a plan.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.planner.PlaningAction.execute_callback">
+<span class="sig-name descname"><span class="pre">execute_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">goal</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/planner.html#PlaningAction.execute_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.planner.PlaningAction.execute_callback" title="Permalink to this definition"></a></dt>
+<dd><p>The callback executed when a client set a goal to the <cite>planner</cite> server.
+This function will return a list of Locations (i.e., the plan) which contains
+as the fist point the current robot position (retrieved from the <cite>robot-state</cite> node
+through the /state/get_pose service), whereas the last point is the <cite>goal</cite> position
+(given from the state machine as goal for the action server).
+The plan will contain an unknown intermediate position used to simulate a via point
+path through the target location. To simulate computation, there is a delay.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>goal</strong> (<em>PlanGoal</em>) – the goal location</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scripts.planner._get_client_position">
+<span class="sig-prename descclassname"><span class="pre">scripts.planner.</span></span><span class="sig-name descname"><span class="pre">_get_client_position</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/planner.html#_get_client_position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.planner._get_client_position" title="Permalink to this definition"></a></dt>
+<dd><p>Retrieve the current robot position by the <cite>state/get_pose</cite>
+server of the <cite>robot-state</cite> node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the current robot position</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>position (Location)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-scripts.robot_state">
+<span id="robot-state-module"></span><h2>Robot State Module<a class="headerlink" href="#module-scripts.robot_state" title="Permalink to this heading"></a></h2>
+<span class="target" id="module-robot_state"></span><p>This node contains the current robot position, updated by the controller node. This current position is
+then shared with the planner node. The communication with the planner and controller node is implemented
+using two custom Ros services.
+It contains also the state of the robot battery (high or low battery level), and each time there is a change
+of state (from high to low and viceversa) the battery level is published to the state machine node.</p>
+<dl>
+<dt>ROS Parameters:</dt><dd><p><strong>/battery_time</strong> the waiting time used to simulate the usage of the battery and the recharging time.</p>
+</dd>
+<dt>Service:</dt><dd><p><strong>/state/set_pose</strong> receives from the controller node, the new robot position .</p>
+<p><strong>/state/get_pose</strong> sends to the planner node, the current robot position.</p>
+<p><strong>/inteface/start_charging</strong> receives from the state machine node, the bloolean flag used to handle the charging process.</p>
+</dd>
+<dt>Publisher:</dt><dd><p><strong>/state/battery_low</strong> topic where the robot battery state is published.</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.robot_state.RobotState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.robot_state.</span></span><span class="sig-name descname"><span class="pre">RobotState</span></span><a class="reference internal" href="_modules/scripts/robot_state.html#RobotState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.robot_state.RobotState" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>This class defines three services: one to send the current robot position (state/get_pose),
+one to update the robot position (state/set_pose), and one to handle the robot charging process (inteface/start_charging).
+Then defines a publisher to notify the robot battery level (state/battery_low).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.robot_state.RobotState._is_battery_low">
+<span class="sig-name descname"><span class="pre">_is_battery_low</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/robot_state.html#RobotState._is_battery_low"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.robot_state.RobotState._is_battery_low" title="Permalink to this definition"></a></dt>
+<dd><p>Publish changes of battery levels when the battery change state (i.e., high/low).
+This method runs on a separate thread.
+The message is published through the <cite>publisher</cite> input parameter and it is
+a boolean value, i.e., <cite>True</cite>: battery low, <cite>False</cite>: battery high.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.robot_state.RobotState.get_position">
+<span class="sig-name descname"><span class="pre">get_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/robot_state.html#RobotState.get_position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.robot_state.RobotState.get_position" title="Permalink to this definition"></a></dt>
+<dd><p>This is the ‘state/get_pose’ service implementation.
+The ‘request’ input parameter is not used, therefore it is empty.
+Then the robot state node, gives as ‘response’ ,to the client (the planner node)
+the actual robot posisition.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.robot_state.RobotState.set_position">
+<span class="sig-name descname"><span class="pre">set_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/robot_state.html#RobotState.set_position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.robot_state.RobotState.set_position" title="Permalink to this definition"></a></dt>
+<dd><p>This is the ‘robot/set_pose’ service implementation.
+It takes as ‘request’ input parameter the new robot position
+to be set, from the controller node.
+This server returns an empty ‘response’ (no response is needed).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.robot_state.RobotState.start_charging">
+<span class="sig-name descname"><span class="pre">start_charging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/robot_state.html#RobotState.start_charging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.robot_state.RobotState.start_charging" title="Permalink to this definition"></a></dt>
+<dd><p>This is the ‘inteface/start_charging’ service implementation.
+It takes as ‘request’ input parameter the start charging flag
+used to handle the charging process.
+This server returns an empty ‘response’ (no response is needed).</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-scripts.state_machine">
+<span id="state-machine-module"></span><h2>State Machine Module<a class="headerlink" href="#module-scripts.state_machine" title="Permalink to this heading"></a></h2>
+<span class="target" id="module-state_machine"></span><p>This module manages the Finite State Machine (FSM) of the architecture,
+which is implemented by using The <a class="reference external" href="http://wiki.ros.org/smach">ROS SMACH library</a>.
+States are non-concurrent and updated at a rate defined by the LOOP_SLEEP_TIME global variable.</p>
+<dl class="simple">
+<dt>ROS Parameters:</dt><dd><p><strong>/waiting_time</strong> the waiting time used to simulate that the robot does something when is in the reached location.</p>
+</dd>
+<dt>Service:</dt><dd><p><strong>/state/set_pose</strong> sends the initial robot position to the robot state node .</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.state_machine.Moving">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.state_machine.</span></span><span class="sig-name descname"><span class="pre">Moving</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_machine_interface</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/state_machine.html#Moving"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.state_machine.Moving" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code></p>
+<p>The definition of the Moving state.
+In this state the robot goes from the current location
+to the target location, thanks to the Controller node.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.state_machine.Moving.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/state_machine.html#Moving.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.state_machine.Moving.execute" title="Permalink to this definition"></a></dt>
+<dd><p>Function performed each time the state machine enter in the Moving state.
+The Moving state receives from the Planning state the variable plan which
+is the target location to reach. This target location is sent to the controller
+node (the action server) using the method of the class Handler.
+If the battery gets a low level and the robot is not in the low battery mode
+the goal (the plan for reach the target location) is cancelled and there is
+the transition from the moving to recharging state (low_battery transition).
+Instead, if the battery level is not low or if the robot is in the low battery mode,
+the state waits that the controller action server is done and after that, it retrieves
+the new location, as Action result, and then updates the robot position and the robot and
+location timestamp.
+Lastly, if the battery is low, the state machine goes in the Recharging state to check if
+the controller moves the robot in the charging location (and charge the robot), otherwise
+the state machine goes in the ‘Wait’ state which simulate that the robot does something in the location.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.state_machine.Planning">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.state_machine.</span></span><span class="sig-name descname"><span class="pre">Planning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_machine_interface</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/state_machine.html#Planning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.state_machine.Planning" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code></p>
+<p>The definition of the Planning state.
+It is the state where the robot plans
+the next position that has to be reached</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.state_machine.Planning.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/state_machine.html#Planning.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.state_machine.Planning.execute" title="Permalink to this definition"></a></dt>
+<dd><p>Function performed each time the state machine enter in the Planning state.
+It checks if the robot is in the low battery mode, if the low battery mode is active
+the planning state plans how to reach the charging location, otherwise, it plans how to reach
+the next location (which can be an urgent location and/or a corridor).
+The low battery mode is active when the robot has a low battery level and it is not in the
+charging location when the battery gets low level.
+Once the plan is ready, the planning state, using the Handler class as interface, sends
+the target location as goal to the Action server (the planner node).
+If during this process, the battery gets low level and the robot is not in the low battery mode
+the goal (the next location to reach) is cancelled and there is the transition from the planning to recharging
+state (low_battery transition).
+Instead, if the battery level is not low or if the robot is in the low battery mode, the state waits that
+the action server (planner node) has finished and so, that the plan is ready.
+Then the plan is sent to the moving state using the ‘userdata’ and lastly there is the transition from
+the planning state to the moving state.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.state_machine.Recharging">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.state_machine.</span></span><span class="sig-name descname"><span class="pre">Recharging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_machine_interface</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/state_machine.html#Recharging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.state_machine.Recharging" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code></p>
+<p>The definition of the recharging state.
+It is the state where the robot recharges its battery
+after it has reached the charging location.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.state_machine.Recharging.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/state_machine.html#Recharging.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.state_machine.Recharging.execute" title="Permalink to this definition"></a></dt>
+<dd><p>Function performed each time the state machine enter in the Recharging state.
+This state checks if the robot is in the charging location. In case the robot is
+in the charging location It sends to the Robot State node, the boolean flag ‘found’
+(True value) through the /interafce/start_charging service, in order to say to the robot state
+node that the charging process can begin because the robot is in the charging location.
+otherwise, if the robot is not in the charging location, activate the low battery mode.
+This is a mode that sets the Planning and the Moving state in order to search and reach only the
+charging location.
+Lastly, if the battery is recharged, the state variables (and flags) are reset and the found flag
+is sent again to the robot state node (in order to reset also there the flag) then the state machine
+comes back to the Planning node, through the ‘charged_battery’ transition.
+Instead, if the battery is still low and the charging location is not yet found (found flag is False)
+then the state machine goes in the Planning mode, through the ‘search_charging_location’ transition,
+in order to compute a plan to reach the charging location.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.state_machine.Wait">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.state_machine.</span></span><span class="sig-name descname"><span class="pre">Wait</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_machine_interface</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/state_machine.html#Wait"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.state_machine.Wait" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code></p>
+<p>The definition of the wait state.
+It is the state where is simulated that the robot
+is doing something in the reached location</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.state_machine.Wait.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/state_machine.html#Wait.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.state_machine.Wait.execute" title="Permalink to this definition"></a></dt>
+<dd><p>Function performed each time the state machine enter in the Wait state.
+If the battery is not low, this state simply use a busy wait to simulate that the
+robot is doing something, after this waiting time the state machine goes back to
+the Planning state.
+if the battery is low, the state machine goes in the Recharging state</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.state_machine.WaitForTopMap">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.state_machine.</span></span><span class="sig-name descname"><span class="pre">WaitForTopMap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_machine_interface</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/state_machine.html#WaitForTopMap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.state_machine.WaitForTopMap" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code></p>
+<p>The definition of the wait_for_top_map state.
+It is the state where the robot waits that the
+map (creation of the ontology) is ready.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.state_machine.WaitForTopMap.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/state_machine.html#WaitForTopMap.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.state_machine.WaitForTopMap.execute" title="Permalink to this definition"></a></dt>
+<dd><p>Function performed each time the state machine enter in the Wait_For_Top_Map state.
+It creates the map and sets all the important parameter of the ontology.
+Once the map is ready, it sends the starting position to the robot state node (through the /state/set_pose)
+and goes in the next state (Planning state) through the ‘top_map_ready’ transition, otherwise,
+it continues to wait that the map is ready (‘no_top_map’ transition).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scripts.state_machine.main">
+<span class="sig-prename descclassname"><span class="pre">scripts.state_machine.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/state_machine.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.state_machine.main" title="Permalink to this definition"></a></dt>
+<dd><p>This is the main function, in which the state machine is initialised,
+configured and run. The Introspection Server is also started to allow the
+state machine to be visualised via the <a class="reference external" href="http://wiki.ros.org/smach">ROS SMACH library</a>.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Experimental Robot Laboratory assignment 1 documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="utilities.html" class="btn btn-neutral float-right" title="utilities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Gabriele Russo.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
