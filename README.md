@@ -2,7 +2,11 @@
 This is the first assignment of the university course Experimental robotics laboratory, developed by the student Gabriele Russo
 
 ## Introduction
-The aim of this assignment is to simulate a surveillance robot in an indoor environment (the pctures below)
+The aim of this assignment is to simulate a surveillance robot in an indoor environment (the pictures below). The robot starts in the E corridor and then it will go to visit the other locations, giving the priority to the urgent locations and to the corridors. The urgent locations are location that the robot hasn't visited for some time. Once it is in a location, it has to wait some time in order to simulate that it is doing something. During this process if the robot gets a low battery level, it has to go in the corridor E which is the charging location.
+
+In order to do this, the indoor environment is associated to an ontology implemented using the [Armor system](https://github.com/EmaroLab/armor) and the robot behaviour is defined using a Final State Machine which is implemented through [ROS SMACH](http://wiki.ros.org/smach).
+
+The code of this assignment has been developed using as landmark the [arch_skeleton](https://github.com/buoncubi/arch_skeleton) by [Professor Luca Buoncomapgni](https://github.com/buoncubi).
 
 ![Assignment environment](https://github.com/GabrieleRusso11/exproblab_assignment1_russo_gabriele/blob/main/media/assignment_map.png)
 
