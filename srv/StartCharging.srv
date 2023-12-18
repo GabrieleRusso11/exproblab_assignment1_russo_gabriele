@@ -2,7 +2,7 @@
 
 ### Request
 
-# start battery charging.
+# start battery charging flag.
 
 bool start
 

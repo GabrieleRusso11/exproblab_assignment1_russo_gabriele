@@ -2,7 +2,7 @@
 
 ### Request
 
-# The current robot position to be stored.
+# The new robot position to be stored.
 
 Location position
 
