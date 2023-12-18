@@ -137,6 +137,10 @@ In order to run this project, go in the workspace and launch the launch file:
 
 # Video Demo.
 
+
+https://github.com/GabrieleRusso11/exproblab_assignment1_russo_gabriele/assets/93495918/acfe5f8e-1d33-42bd-a91f-d802b899b981
+
+
 # Working hypothesis and environment 
 For this project are considerated different assumptions.
 Firstly, the environment is considered as a 2D map, so the robot doesn't interact with a real simulation environment.
