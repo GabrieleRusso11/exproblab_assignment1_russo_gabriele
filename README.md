@@ -137,10 +137,48 @@ In order to run this project, go in the workspace and launch the launch file:
 
 # Video Demo.
 
-# Working hypothesis and environment (1 or 2 paragraph).
-## System’s features (1 or 2 paragraph).
-## System’s limitations (1 or 2 paragraph).
-## Possible technical Improvements (1 or 2 paragraph).
+# Working hypothesis and environment 
+For this project are considerated different assumptions.
+Firstly, the environment is considered as a 2D map, so the robot doesn't interact with a real simulation environment.
+Then, the robot starts from the E corridor which is both the charging location and a normal location to be visited.
+Then, there is a priority in the choice of the location to visit. Robot has to visit before the corridors and then the rooms.
+If there are no corridors between the urgent locations to visit, then the robot will give higher priority to the urgent room, otherwise the corridors have always the higher priority.
+In this way, since the corridors are connected to more locations (a corridors has to have at least 2 doors) than the rooms, the robot can reach more location and can reach quickly the charging location when the battery is low.
+The battery level low is considered has a minimum battery level threshold after that the robot has to charge is battery as soon as possible. 
+When the battery level is low, if the robot is already in the charging location, the charging process starts immediatly, otherwise the robot is in the low battery level mode and the planner and the controller will be used only to find and reach the charging location.
+So when the robot is in the rescharging state, it can go in the plannig state both if the battery is charged and also if the robot has to reach the charging location (low battery mode)
+
+ 
+## System’s features
+
+In the following are listed the system's features:
+
+- Colored User Interface in order to allow the users to define and create the indoor environment as they prefer.
+
+- High priority to battery_low signals in order to recharge the robot's battery as soon as possible
+
+- possibilty of setting the parameters saved in the ROS parameter server for a tailored functioning of the system and for passing the ontology folder path from the launch file
+
+- python script to manage the ontology and interact with it and to function as interface between the state machine node and the other nodes
+
+- robot_state node that keeps track of the robot state (position and battery level)
+
+- SImple algorithms for planning and controlling the robot (simulating the necessary time for performing the corresponding operations)
+
+- Log informations for each node with different colors
+
+## System’s limitations and Possible technical Improvements
+
+- **Environment**: in this assignment there is an ideal environment, so there aren't walls and obstacle.
+So a first possible improvement is to build a more realistic simulated environment for instance with walls and obstacle, in order to test the behaviour of the code and of the robot in a more proper way.
+
+- **Planner and Controller**: the planner and the controller node are very simple and they do nothing of practical. The planner simply creates a plan composed by the initial position, a generic intermediate position and the target position. The controller simply takes the plan and update the robot position until it reaches the final location. So both nodes simulates a planner and controller nodes. A possible improvement is to develop a more realistic and efficient planner and controller algorithms, for instance to evaluate a reasonable path towards the target location (avoiding obstacles and walls) and to control the actuator of the robot in order to follow the generated path.
+
+- **Battery management**: Actually the battery level is only a boolean variable that passes from True to false (and viceversa) in order to simulate the change of the battery level. The charging and discharging of the battery are a simple busy waiting times.
+So a first improvement is to output the charging and the discharging of the battery in order to show to the users the increasing or decreasing of the battery. Lastly, the battery management can be improved with a more realistic and proper algorithm, in order to make the battery usage more realistic.
+
+- **Urgent Locations management**: the urgent location to visit is chosen randomly between the locations in the urgent location list (if there are corridors, the priority is given to them), this means that there is not an order based on the time (for example first urgent location to visit is the location that the robot has not visited in the longest time). So a possible improvement is to handle the urgent location list giving higher priority based on the less recent visited time.
+
 
 # Authors and contacts (at least the email).
 
