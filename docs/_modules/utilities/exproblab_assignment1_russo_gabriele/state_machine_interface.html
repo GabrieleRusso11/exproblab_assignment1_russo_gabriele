@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>utilities.exproblab_assignment1_russo_gabriele.state_machine_interface &mdash; ExpRobLab assignment 1 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js?v=73cda6fb"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            ExpRobLab assignment 1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">ExpRobLab assignment 1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">utilities.exproblab_assignment1_russo_gabriele.state_machine_interface</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for utilities.exproblab_assignment1_russo_gabriele.state_machine_interface</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. module:: state_machine_interface       </span>
+<span class="sd">   :platform: Ubuntu 20.04</span>
+<span class="sd">   :synopsis: Python module which implement an interaface used to handle the comunication between the state machine node and the other components of the architecture</span>
+
+<span class="sd">.. moduleauthor:: Gabriele Russo &lt;gabriele.russo117@gmail.com&gt;</span>
+
+<span class="sd">This module implements an interaface used to handle the comunication between </span>
+<span class="sd">the state machine node and the other components of the architecture but it also</span>
+<span class="sd">contains functions used by the state machine node to compute data and to interact </span>
+<span class="sd">with the ontology through the Armor server</span>
+
+<span class="sd">ROS Parameters:</span>
+<span class="sd">  **/starting_map** starting map file (it has the Ontology skeleton ) \n</span>
+<span class="sd">  **/operative_map** is the file where the final map (and the complete ontology) will be loaded \n</span>
+<span class="sd">  **/location_property** property &quot;hasDoor&quot; associated to a location (room and corridor) \n</span>
+<span class="sd">  **/robot_property** property &quot;isIn&quot; to get or set the robot position in the map \n</span>
+<span class="sd">  **/now_property** property &quot;now&quot; is a robot time property \n</span>
+<span class="sd">  **/urgent_property** property &quot;urgencyThreshold&quot; to change the urgency threshold, associated to the locations \n</span>
+<span class="sd">  **/visited_property** property &quot;visitedAt&quot; used to change the timestamp of a location, when the robot visits it \n</span>
+<span class="sd">  **/canreach_property** property &quot;canReach&quot; to get the locations that the robot can reach \n</span>
+<span class="sd">  **/robot_name** the name that identify the robot \n</span>
+<span class="sd">  **/charging_location** the name of the location where is the charging station \n</span>
+
+<span class="sd">Subscriber:</span>
+<span class="sd">  **/state/battery_low** receives from the robot state node the robot battery level \n</span>
+
+<span class="sd">Service:</span>
+<span class="sd">  **/inteface/start_charging** sends to the robot state node, the value of the start charging flag, as service request, in order to handle the robot charging process .\n</span>
+
+<span class="sd">Action Client:</span>
+<span class="sd">  **/motion/controller** sends to the controller node the path plan as goal, and receives the final location reached as result. \n</span>
+<span class="sd">  **/motion/planner** sends to the planner node the new location to reach as goal, and receives the path plan to reach the new location as result. \n</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Import libraries.</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">rospy</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">calendar</span>
+
+<span class="c1"># Import the simple ActionClient.</span>
+<span class="kn">from</span> <span class="nn">actionlib</span> <span class="kn">import</span> <span class="n">SimpleActionClient</span>
+
+<span class="c1"># Import mutex to manage synchronization among ROS-based threads (i.e., node loop and subscribers)</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Lock</span>
+
+<span class="c1"># Import constant names that define the architecture&#39;s structure.</span>
+<span class="kn">from</span> <span class="nn">exproblab_assignment1_russo_gabriele</span> <span class="kn">import</span> <span class="n">architecture_names</span> <span class="k">as</span> <span class="n">anm</span>
+
+<span class="c1"># Import ROS-based messages.</span>
+<span class="kn">from</span> <span class="nn">std_msgs.msg</span> <span class="kn">import</span> <span class="n">Bool</span>
+<span class="kn">from</span> <span class="nn">std_msgs.msg</span> <span class="kn">import</span> <span class="n">String</span>
+
+<span class="c1"># Import custom message, actions and services.</span>
+<span class="kn">from</span> <span class="nn">exproblab_assignment1_russo_gabriele.msg</span> <span class="kn">import</span> <span class="n">PlanAction</span><span class="p">,</span> <span class="n">ControlAction</span><span class="p">,</span> <span class="n">Location</span>
+<span class="kn">from</span> <span class="nn">exproblab_assignment1_russo_gabriele.srv</span> <span class="kn">import</span> <span class="n">NewPosition</span><span class="p">,</span> <span class="n">StartCharging</span>
+
+<span class="kn">from</span> <span class="nn">armor_api.armor_client</span> <span class="kn">import</span> <span class="n">ArmorClient</span>
+<span class="kn">from</span> <span class="nn">armor_msgs.msg</span> <span class="kn">import</span> <span class="n">ArmorDirectiveReq</span>
+
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">realpath</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1"># to color the text</span>
+<span class="kn">import</span> <span class="nn">colorama</span>
+<span class="kn">from</span> <span class="nn">colorama</span> <span class="kn">import</span> <span class="n">Fore</span>
+
+<span class="c1"># get the starting map from the parameter server</span>
+<span class="n">s_map</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s2">&quot;/starting_map&quot;</span><span class="p">)</span>
+
+<span class="c1"># get the file where the user map will be loaded</span>
+<span class="c1"># from the parameter server</span>
+<span class="n">op_map</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s2">&quot;/operative_map&quot;</span><span class="p">)</span>
+
+<span class="c1"># Definition of the path used to load the map file in </span>
+<span class="c1"># the armor server for the map creation </span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">(</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
+<span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s2">&quot;/../topological_map/&quot;</span>
+
+
+<span class="c1"># A tag for identifying logs producer.</span>
+<span class="n">LOG_TAG</span> <span class="o">=</span> <span class="s1">&#39;state-machine&#39;</span> <span class="o">+</span> <span class="s1">&#39;-HELPER&#39;</span>
+
+
+
+<div class="viewcode-block" id="ActionClientHelper"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper">[docs]</a><span class="k">class</span> <span class="nc">ActionClientHelper</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class to simplify the implementation of a </span>
+<span class="sd">    simple action client for ROS action servers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">service_name</span><span class="p">,</span> <span class="n">action_type</span><span class="p">,</span> <span class="n">done_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">feedback_callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mutex</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class constructor</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          service_name : it is the name of the server that will be invoked by this client.</span>
+<span class="sd">          action_type : it is the message type that the server will exchange.</span>
+<span class="sd">          done_callback : it is the name of the function called when the action server completed its computation. If this parameter is not set (i.e., set to `None`), then only the `self._done_callback` function will be called when the server completes its computation.</span>
+<span class="sd">          feedback_callback : it is the name of the function called when the action server sends a feedback message. If this parameter is not set (i.e., set to `None`), then only the `self._feedback_callback` functions will be called when the server sends a feedback message.</span>
+<span class="sd">          mutex : it is a &#39;Lock&#39; object synchronised with the `done_callback` and `feedback_callback`. If it is not set (i.e., set to `None`), then a new mutex instance is considered. Set this variable if you want to extends the synchronization with other classes.</span>
+
+<span class="sd">        Note: This class was implemented by the professor Luca Buoncompagni (https://github.com/buoncubi/arch_skeleton)  </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Initialize the state of this client: `_is_running`, `_is_done`, and `_results`.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_client_states</span><span class="p">()</span>
+
+        <span class="c1"># Set the name of the server to be invoked.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_service_name</span> <span class="o">=</span> <span class="n">service_name</span>
+
+        <span class="c1"># Get or create a new mutex.</span>
+        <span class="k">if</span> <span class="n">mutex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mutex</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mutex</span> <span class="o">=</span> <span class="n">mutex</span>
+        
+        <span class="c1"># Instantiate a simple ROS-based action client.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">SimpleActionClient</span><span class="p">(</span><span class="n">service_name</span><span class="p">,</span> <span class="n">action_type</span><span class="p">)</span>
+
+        <span class="c1"># Set the done and feedback callbacks defined by the class using this client.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_external_done_cb</span> <span class="o">=</span> <span class="n">done_callback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_external_feedback_cb</span> <span class="o">=</span> <span class="n">feedback_callback</span>
+
+        <span class="c1"># Wait for the action server to be alive.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">wait_for_server</span><span class="p">()</span>
+
+    
+<div class="viewcode-block" id="ActionClientHelper.send_goal"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.send_goal">[docs]</a>    <span class="k">def</span> <span class="nf">send_goal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">goal</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start the action server with a new `goal`. </span>
+<span class="sd">        Note: this call is not blocking (i.e., asynchronous performed).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># A new goal can be given to the action server only if it is not running.</span>
+        <span class="c1"># This simplification implies that within the ROS architecture no more </span>
+        <span class="c1"># than one client can use the same server at the same time.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_running</span><span class="p">:</span>
+
+            <span class="c1"># Start the action server (sending the goal).</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">send_goal</span><span class="p">(</span><span class="n">goal</span><span class="p">,</span>
+                                   <span class="n">done_cb</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_done_callback</span><span class="p">,</span>
+                                   <span class="n">feedback_cb</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_feedback_callback</span><span class="p">)</span>
+            
+            <span class="c1"># Set the client&#39;s states.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_is_running</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_is_done</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">warn_msg</span> <span class="o">=</span> <span class="s1">&#39;Warning send a new goal, cancel the current request first!&#39;</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logwarn</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">warn_msg</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ActionClientHelper.cancel_goals"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.cancel_goals">[docs]</a>    <span class="k">def</span> <span class="nf">cancel_goals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Stop the computation of the action server (cancels the goal sent).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># The computation can be stopped only if the server is actually computing.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_running</span><span class="p">:</span>
+
+            <span class="c1"># Stop the computation.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">cancel_all_goals</span><span class="p">()</span>
+
+            <span class="c1"># Reset the client&#39;s state.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset_client_states</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">warn_msg</span> <span class="o">=</span> <span class="s1">&#39;Warning cannot cancel a not running service!&#39;</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logwarn</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">warn_msg</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ActionClientHelper.reset_client_states"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.reset_client_states">[docs]</a>    <span class="k">def</span> <span class="nf">reset_client_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset the client state variables stored in this class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_running</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_done</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_results</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="ActionClientHelper._feedback_callback"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper._feedback_callback">[docs]</a>    <span class="k">def</span> <span class="nf">_feedback_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">feedback</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is called when the action server send some `feedback` to the client.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Acquire the mutex to synchronise the computation concerning the `feedback` </span>
+        <span class="c1"># message with the other nodes of the architecture.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="c1"># Eventually, call the method provided by the node that uses this </span>
+            <span class="c1"># action client to manage a feedback.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_external_feedback_cb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_external_feedback_cb</span><span class="p">(</span><span class="n">feedback</span><span class="p">)</span>
+            
+        <span class="k">finally</span><span class="p">:</span>
+
+            <span class="c1"># Realise the mutex to (eventually) unblock ROS-based </span>
+            <span class="c1"># thread waiting on the same mutex.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ActionClientHelper._done_callback"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper._done_callback">[docs]</a>    <span class="k">def</span> <span class="nf">_done_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is called when the action server finish its computation,</span>
+<span class="sd">        i.e., it provides a `done` message.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Acquire the mutex to synchronise the computation concerning </span>
+        <span class="c1"># the `done` message with the other nodes of the architecture.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="c1"># Set the client&#39;s state</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_is_running</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_is_done</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_results</span> <span class="o">=</span> <span class="n">results</span>
+
+            <span class="c1"># Eventually, call the method provided by the node that </span>
+            <span class="c1"># uses this action client to manage a result.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_external_done_cb</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_external_done_cb</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+            
+        <span class="k">finally</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div>
+
+    <span class="c1"># These three function should be mutex safe</span>
+<div class="viewcode-block" id="ActionClientHelper.is_done"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.is_done">[docs]</a>    <span class="k">def</span> <span class="nf">is_done</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get `True` if the action server finished is computation, or `False` otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_done</span></div>
+
+<div class="viewcode-block" id="ActionClientHelper.is_running"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.is_running">[docs]</a>    <span class="k">def</span> <span class="nf">is_running</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get `True` if the action server is running, or `False` otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_running</span></div>
+
+<div class="viewcode-block" id="ActionClientHelper.get_results"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.get_results">[docs]</a>    <span class="k">def</span> <span class="nf">get_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the results of the action server, if any, or `None`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_done</span><span class="p">:</span>
+
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_results</span>
+        
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">log_err</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Error: cannot get result for `</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_service_name</span><span class="si">}</span><span class="s1">`.&#39;</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">log_err</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span>
+
+            <span class="k">return</span> <span class="kc">None</span></div></div>
+
+<div class="viewcode-block" id="Handler"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler">[docs]</a><span class="k">class</span> <span class="nc">Handler</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The class Handler is used as an interface of the state machine to handle </span>
+<span class="sd">    the comunication with the other nodes but also to contains function used by</span>
+<span class="sd">    the state machine to compute data, for instance the creation of the ontology</span>
+<span class="sd">    and the retrieving of information from the ontology itself.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class constructor, i.e., class initializer.</span>
+<span class="sd">        It creates a shared mutex to synchronize action clients and subscribers.</span>
+<span class="sd">        Then it sets the initial state involving the &#39;self._battery_low&#39;,&#39;self.found&#39; </span>
+<span class="sd">        and &#39;self.low_battery_mode&#39; variables, gets some parameters from the Ros server parameter</span>
+<span class="sd">        and initialize the main variables odìf the class.</span>
+<span class="sd">        Lastly it defines the subscriber to the robot state node topic and the two Action client </span>
+<span class="sd">        motion/controller and motion/planning</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Create a shared mutex to synchronize action clients and subscribers.</span>
+        <span class="c1"># Note that, based on different assumptions, further optimization </span>
+        <span class="c1"># can be done to make the different threads blocking for a less </span>
+        <span class="c1"># amount of time in the same mutex.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mutex</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+
+        <span class="c1"># Set the initial state involving the `self._battery_low`, </span>
+        <span class="c1"># `self.found` and `self.low_battery_mode` variables.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_states</span><span class="p">()</span>
+
+        <span class="c1"># object properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loc_prop</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s2">&quot;/location_property&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rob_prop</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s2">&quot;/robot_property&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">now_prop</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s2">&quot;/now_property&quot;</span><span class="p">)</span>
+
+        <span class="c1"># data properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">urg_th</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s2">&quot;/urgent_property&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vis</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s2">&quot;/visited_property&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s2">&quot;/canreach_property&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rob</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s2">&quot;/robot_name&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type_value</span> <span class="o">=</span> <span class="s2">&quot;LONG&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">old_value</span> <span class="o">=</span> <span class="s2">&quot;7&quot;</span>
+
+        <span class="c1"># initialize the initial robot position</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_pos</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="c1"># will contain all the corridors and rooms </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loc</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># number of corridors and rooms</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_corr</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_room</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># initialization of the armor client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init_client</span><span class="p">()</span>
+
+        <span class="c1"># initialization of the robot charging location</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">charging_loc</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s2">&quot;/charging_location&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Define the callback associated with the battery low ROS subscriber.</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">Subscriber</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">TOPIC_BATTERY_LOW</span><span class="p">,</span> <span class="n">Bool</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_battery_callback</span><span class="p">)</span>
+
+        <span class="c1"># Define the clients for the plan and control action servers.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">planner_client</span> <span class="o">=</span> <span class="n">ActionClientHelper</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">ACTION_PLANNER</span><span class="p">,</span> <span class="n">PlanAction</span><span class="p">,</span> <span class="n">mutex</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mutex</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">controller_client</span> <span class="o">=</span> <span class="n">ActionClientHelper</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">ACTION_CONTROLLER</span><span class="p">,</span> <span class="n">ControlAction</span><span class="p">,</span> <span class="n">mutex</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mutex</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Handler.reset_states"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.reset_states">[docs]</a>    <span class="k">def</span> <span class="nf">reset_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reset the states variable (_battery_low, found and low_battery_mode).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_battery_low</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">found</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">low_battery_mode</span> <span class="o">=</span> <span class="kc">False</span></div>
+        
+<div class="viewcode-block" id="Handler._battery_callback"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler._battery_callback">[docs]</a>    <span class="k">def</span> <span class="nf">_battery_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The subscriber to get messages published from the `robot-state` node </span>
+<span class="sd">        into the `/state/battery_low/` topic.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          msg (bool) : the battery level value</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Acquire the mutex to assure the synchronization with the other </span>
+        <span class="c1"># subscribers and action clients (this assure data consistency).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="c1"># Get the battery level  </span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_battery_low</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">data</span>
+        
+        <span class="k">finally</span><span class="p">:</span>
+
+            <span class="c1"># Release the mutex to eventually unblock the other </span>
+            <span class="c1"># subscribers or action servers that are waiting.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Handler.is_battery_low"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.is_battery_low">[docs]</a>    <span class="k">def</span> <span class="nf">is_battery_low</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the state variable encoded in this class that concerns the battery level.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">          self._battery_low (bool) : battery level. &#39;True&#39; if the battery is low, &#39;False&#39; otherwise.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_battery_low</span></div>
+
+<div class="viewcode-block" id="Handler.set_starting_flag"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.set_starting_flag">[docs]</a>    <span class="k">def</span> <span class="nf">set_starting_flag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">feedback</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the start charging flag stored in the &#39;robot-state&#39; node.</span>
+<span class="sd">        This method is used to say if the robot state can change the battery level</span>
+<span class="sd">        in order to start the charging battery simulation only when the robot has</span>
+<span class="sd">        reached the charging location.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">          feedback (bool) : the value of the start charging flag. If it is &#39;True&#39; the robot can start the charging process, &#39;False&#39; the robot has to wait.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># wait for the server to be initialized.</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">wait_for_service</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">SERVER_CHARGING</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="c1"># Call the service and set the start charging flag.</span>
+            <span class="n">service</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">ServiceProxy</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">SERVER_CHARGING</span><span class="p">,</span> <span class="n">StartCharging</span><span class="p">)</span>
+            <span class="n">service</span><span class="p">(</span><span class="n">feedback</span><span class="p">)</span>  <span class="c1"># The response is not used.</span>
+
+        <span class="k">except</span> <span class="n">rospy</span><span class="o">.</span><span class="n">ServiceException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+
+            <span class="n">log_msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Server cannot set the starting flag: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">logerr</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="n">log_msg</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span></div>
+
+<span class="c1"># ******************************** SECTION WITH THE METHODS USED TO CREATE THE MAP ********************************</span>
+
+    <span class="c1"># This method initialize the armor client, </span>
+    <span class="c1"># used to load and to communicate with the ontology</span>
+<div class="viewcode-block" id="Handler.init_client"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.init_client">[docs]</a>    <span class="k">def</span> <span class="nf">init_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method initialize the armor client, </span>
+<span class="sd">        used to load and to communicate with the ontology</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">          client : Armor client identifier</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">client</span> <span class="o">=</span> <span class="n">ArmorClient</span><span class="p">(</span><span class="s2">&quot;create_map&quot;</span><span class="p">,</span> <span class="s2">&quot;top_map&quot;</span><span class="p">)</span> <span class="c1"># &quot;create_map&quot; is the client id (name) </span>
+                                                      <span class="c1"># and &quot;top_map&quot; is the reference name that will </span>
+                                                      <span class="c1"># be used to always refer to the same ontology </span>
+                                                      <span class="c1"># loaded on memory.</span>
+
+        <span class="c1"># load the .owl file to create the map </span>
+        <span class="n">client</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">load_ref_from_file</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="n">s_map</span><span class="p">,</span> <span class="s2">&quot;http://bnc/exp-rob-lab/2022-23&quot;</span><span class="p">,</span> <span class="n">buffered_manipulation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">reasoner</span><span class="o">=</span><span class="s1">&#39;PELLET&#39;</span><span class="p">,</span> <span class="n">buffered_reasoner</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mounted</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">client</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">mount_on_ref</span><span class="p">()</span>
+        <span class="n">client</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">set_log_to_terminal</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">client</span></div>
+
+<div class="viewcode-block" id="Handler.add_corridors"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.add_corridors">[docs]</a>    <span class="k">def</span> <span class="nf">add_corridors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method adds locations in the CORRIDOR subclass,</span>
+<span class="sd">        so it adds corridors in the ontology.</span>
+<span class="sd">        Note: a location to be a corridor must have at least two doors</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># loop in order to insert the corridors, stated by the user</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_corr</span><span class="p">):</span>
+            
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;Insert the &quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="s2">&quot;corridor&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot; : &quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">))</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;How many&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;doors&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;have the&quot;</span> <span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;corridor </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;? &quot;</span><span class="p">)</span>
+
+            <span class="n">dim_dc</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">))</span>
+
+            <span class="c1"># loop in order to insert the doors of each corridor</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dim_dc</span><span class="p">):</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;Insert the &quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;door&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot; : &quot;</span><span class="p">)</span>
+                <span class="n">do</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">add_objectprop_to_ind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loc_prop</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">do</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Handler.add_rooms"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.add_rooms">[docs]</a>    <span class="k">def</span> <span class="nf">add_rooms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method adds locations in the ROOM subclass,</span>
+<span class="sd">        so it adds rooms in the ontology.</span>
+<span class="sd">        Note: a location to be a room must have maximum one door</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+        <span class="c1"># loop in order to insert the rooms, stated by the user,</span>
+        <span class="c1"># and the doors for each room</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_room</span><span class="p">):</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;Insert the&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="s2">&quot; room&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot; : &quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">()</span>
+ 
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;Insert the &quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;door&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;of the &quot;</span> <span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;room </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_corr</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot; : &quot;</span><span class="p">)</span>
+            <span class="n">do</span> <span class="o">=</span> <span class="nb">input</span><span class="p">((</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">add_objectprop_to_ind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loc_prop</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_corr</span> <span class="o">+</span> <span class="n">i</span><span class="p">],</span> <span class="n">do</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Handler.disjoint"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.disjoint">[docs]</a>    <span class="k">def</span> <span class="nf">disjoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method disjoint all the individuals</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">disj_inds_of_class</span><span class="p">(</span><span class="s1">&#39;LOCATION&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">disj_inds_of_class</span><span class="p">(</span><span class="s1">&#39;ROOM&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">disj_inds_of_class</span><span class="p">(</span><span class="s1">&#39;DOOR&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">disj_inds_of_class</span><span class="p">(</span><span class="s1">&#39;CORRIDOR&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">disj_inds_of_class</span><span class="p">(</span><span class="s1">&#39;URGENT&#39;</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="Handler.map_creation"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.map_creation">[docs]</a>    <span class="k">def</span> <span class="nf">map_creation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method uses the &#39;add_corridors&#39; and &#39;add_rooms&#39; </span>
+<span class="sd">        methods to allow the user to create the map</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;How many&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="s2">&quot;corridors&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;are there? &quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_corr</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_corridors</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;How many&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="s2">&quot;rooms&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;are there? &quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_room</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">))</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_rooms</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">disjoint</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Handler.change_urg_th"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.change_urg_th">[docs]</a>    <span class="k">def</span> <span class="nf">change_urg_th</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method allows the user to change the location urgency threshold.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;Insert the&quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot; desired threshold&quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot; (it must be greater than 15): &quot;</span><span class="p">)</span>
+        <span class="n">th_new</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">remove_dataprop_from_ind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">urg_th</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rob</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">add_dataprop_to_ind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">urg_th</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rob</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_value</span><span class="p">,</span> <span class="n">th_new</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Handler.loc_visit_time"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.loc_visit_time">[docs]</a>    <span class="k">def</span> <span class="nf">loc_visit_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method initializes the locations visited time</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># take the datetime to initialize each visited time of the </span>
+        <span class="c1"># locations through visitedAt</span>
+        <span class="n">date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
+        <span class="n">utc_time</span> <span class="o">=</span> <span class="n">calendar</span><span class="o">.</span><span class="n">timegm</span><span class="p">(</span><span class="n">date</span><span class="o">.</span><span class="n">utctimetuple</span><span class="p">())</span>
+        <span class="n">new_time</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">utc_time</span><span class="p">)</span>
+
+        <span class="c1"># initiliaze the timestamp of each location (corridors and rooms)</span>
+        <span class="c1"># thanks to the data property visitedAt</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">)):</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">add_dataprop_to_ind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_value</span><span class="p">,</span> <span class="n">new_time</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Handler.init_rob_pos"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.init_rob_pos">[docs]</a>    <span class="k">def</span> <span class="nf">init_rob_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method allows the user to choose the initial position </span>
+<span class="sd">        among the inserted locations.</span>
+<span class="sd">        For this assignment the initial position is the corridor E</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;This is the list of all&quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="s2">&quot;locations&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot; (first corridors, then rooms) : &quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;There are &quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">)</span><span class="si">}</span><span class="s2"> locations &quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;Insert the number of the &quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="s2">&quot;initial location&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot; where robot will start to move&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot; (1 for the first location of the list until </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">)</span><span class="si">}</span><span class="s2"> that is the last location of the list) : &quot;</span><span class="p">)</span>
+        <span class="n">choice</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">input</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">choice</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">add_objectprop_to_ind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rob_prop</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rob</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">choice</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Handler.reasoner"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.reasoner">[docs]</a>    <span class="k">def</span> <span class="nf">reasoner</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Activate the reasoner </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">sync_buffered_reasoner</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">apply_buffered_changes</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Handler.set_map"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.set_map">[docs]</a>    <span class="k">def</span> <span class="nf">set_map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method create the map using the &#39;map_creation()&#39; method </span>
+<span class="sd">        and set all the other main parameters through the previous </span>
+<span class="sd">        methods of this section </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># the user inserts the data to create the desired map</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">map_creation</span><span class="p">()</span>
+
+        <span class="c1"># possible modification of the location urgency threshold </span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;Do you want to change&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;the urgency threshold&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;(y or n) ? &quot;</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">res</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span> <span class="ow">or</span> <span class="n">res</span> <span class="o">==</span> <span class="s2">&quot;Y&quot;</span> <span class="p">:</span>
+
+            <span class="c1"># change the location urgency threshold </span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">change_urg_th</span><span class="p">()</span>
+
+        <span class="k">else</span> <span class="p">:</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;NO changes&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">()</span>
+
+            <span class="k">pass</span>
+
+        <span class="c1"># initialize the timestamp of each location (corridors and rooms) thanks to the data property visitedAt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loc_visit_time</span><span class="p">()</span>
+
+        <span class="c1"># initialize the initial position of the robot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_rob_pos</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">reasoner</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">while</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">end</span><span class="p">):</span>
+
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;Is the map ready? :&quot;</span><span class="p">)</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span> <span class="ow">or</span> <span class="n">c</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+
+                <span class="c1"># save the map created by the user</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">save_ref_with_inferences</span><span class="p">(</span><span class="n">path</span> <span class="o">+</span> <span class="n">op_map</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">end</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">else</span> <span class="p">:</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;The map is not ready or you have written the wrong character&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;Please if the map is ready, write y or Y&quot;</span><span class="p">)</span></div>
+
+<span class="c1"># ******************************* SECTION WITH THE METHODS USED TO OPERATE ON THE MAP *******************************</span>
+
+<div class="viewcode-block" id="Handler.can_reach"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.can_reach">[docs]</a>    <span class="k">def</span> <span class="nf">can_reach</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method returns the locations connected </span>
+<span class="sd">        to the location where the robot is, then</span>
+<span class="sd">        the locations that the robot can reach.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">          reachable (string) : Locations that the robot can reach</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">reachable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">objectprop_b2_ind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rob</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">reachable</span></div>
+    
+<div class="viewcode-block" id="Handler.urgent"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.urgent">[docs]</a>    <span class="k">def</span> <span class="nf">urgent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method returns the urgent locations to visit</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">          urgent (string) : Urgent locations to visit</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">urgent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">ind_b2_class</span><span class="p">(</span><span class="s2">&quot;URGENT&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">urgent</span></div>
+    
+<div class="viewcode-block" id="Handler.corridor"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.corridor">[docs]</a>    <span class="k">def</span> <span class="nf">corridor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method returns the list of corridors </span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">          corridor (string) : list of corridors</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">corridor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">ind_b2_class</span><span class="p">(</span><span class="s2">&quot;CORRIDOR&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">corridor</span></div>
+                
+<div class="viewcode-block" id="Handler.get_time"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.get_time">[docs]</a>    <span class="k">def</span> <span class="nf">get_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method gets the current time </span>
+<span class="sd">        in order to update the timestamps</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">          now : the current time</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()))</span>
+
+        <span class="k">return</span> <span class="n">now</span></div>
+    
+<div class="viewcode-block" id="Handler.update_robot_time"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.update_robot_time">[docs]</a>    <span class="k">def</span> <span class="nf">update_robot_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method updates the robot time</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">old_time_now</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">dataprop_b2_ind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">now_prop</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rob</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">old_time_now</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&quot;(.+?)&quot;&#39;</span><span class="p">,</span> <span class="n">old_time_now</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">new_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_time</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">remove_dataprop_from_ind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">now_prop</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">rob</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">type_value</span><span class="p">,</span> <span class="n">old_time_now</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">add_dataprop_to_ind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">now_prop</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rob</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_value</span><span class="p">,</span> <span class="n">new_time</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Handler.update_location_time"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.update_location_time">[docs]</a>    <span class="k">def</span> <span class="nf">update_location_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_loc</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method updates the location time</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">old_time_vis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">dataprop_b2_ind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="p">,</span> <span class="n">new_loc</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">old_time_vis</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&quot;(.+?)&quot;&#39;</span><span class="p">,</span> <span class="n">old_time_vis</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">new_time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_time</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">remove_dataprop_from_ind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="p">,</span> <span class="n">new_loc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_value</span><span class="p">,</span> <span class="n">old_time_vis</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">add_dataprop_to_ind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vis</span><span class="p">,</span> <span class="n">new_loc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_value</span><span class="p">,</span> <span class="n">new_time</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Handler.update_robot_position"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.update_robot_position">[docs]</a>    <span class="k">def</span> <span class="nf">update_robot_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old_loc</span><span class="p">,</span> <span class="n">new_loc</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method updates the robot position</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">remove_objectprop_from_ind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rob_prop</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rob</span><span class="p">,</span> <span class="n">old_loc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">add_objectprop_to_ind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rob_prop</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rob</span><span class="p">,</span> <span class="n">new_loc</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Handler.ask_rob_pos"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.ask_rob_pos">[docs]</a>    <span class="k">def</span> <span class="nf">ask_rob_pos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method returns the current robot position</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">          rob_pos (string) : current robot position</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">rob_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">objectprop_b2_ind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rob_prop</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rob</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">rob_pos</span></div>
+    
+<div class="viewcode-block" id="Handler.go_in_a_corridor"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.go_in_a_corridor">[docs]</a>    <span class="k">def</span> <span class="nf">go_in_a_corridor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">corr</span><span class="p">,</span><span class="n">can_reach</span><span class="p">,</span><span class="n">goal</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method seach a corridor among the reachable locations</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">can_reach</span><span class="p">)):</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">corr</span><span class="p">)):</span>
+
+                <span class="k">if</span> <span class="n">can_reach</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">corr</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+
+                    <span class="n">goal</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">can_reach</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">goal</span> <span class="o">==</span> <span class="p">[]</span> <span class="p">:</span>
+
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;NO &quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="s2">&quot;corridor&quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot; is reachable&quot;</span><span class="p">)</span>
+
+            <span class="n">goal</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">can_reach</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Handler.target_location"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.target_location">[docs]</a>    <span class="k">def</span> <span class="nf">target_location</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method returns the target location, </span>
+<span class="sd">        i.e. the location that the robot should reach</span>
+<span class="sd">        considering the corridors, the urgent locations and</span>
+<span class="sd">        obviously the reachable locations</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">          plan (Location) : the next location to reach</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">j</span><span class="o">=</span><span class="mi">0</span>
+
+        <span class="n">reachable_urg_loc</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">goal_loc</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># locations that the robot can reach </span>
+        <span class="n">reachable_loc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_reach</span><span class="p">()</span>
+
+        <span class="c1"># urgent locations</span>
+        <span class="n">urgent_loc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">urgent</span><span class="p">()</span>
+
+        <span class="c1"># corridors</span>
+        <span class="n">corridors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">corridor</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;the robot can reach the following locations : &quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">reachable_loc</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="s2">&quot;corridors&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot; are : &quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">corridors</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+
+        <span class="c1"># check if there are urgent locations</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">urgent_loc</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">:</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTCYAN_EX</span> <span class="o">+</span> <span class="s2">&quot;urgent locations&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot; are : &quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">urgent_loc</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">()</span>
+
+            <span class="c1"># check if the urgent locations are reachable </span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reachable_loc</span><span class="p">)):</span>
+
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">urgent_loc</span><span class="p">)):</span>
+
+                    <span class="k">if</span> <span class="n">reachable_loc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">urgent_loc</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+                        <span class="n">reachable_urg_loc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reachable_loc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            
+            <span class="c1"># urgent locations reachable</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reachable_urg_loc</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">:</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTCYAN_EX</span> <span class="o">+</span> <span class="s2">&quot;urgent location&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot; found &quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">()</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;Go in the &quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTCYAN_EX</span> <span class="o">+</span> <span class="s2">&quot;urgent location&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+                <span class="c1"># The target location is a random choice between the urgent locations</span>
+                <span class="n">plan</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">reachable_urg_loc</span><span class="p">)</span>
+
+            <span class="k">else</span> <span class="p">:</span> <span class="c1"># if no urgent location is reachable, then go in a corridor</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;No &quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTCYAN_EX</span> <span class="o">+</span> <span class="s2">&quot;urgent location&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;reachable&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">()</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;Go in a &quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="s2">&quot;reachable corridor &quot;</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">go_in_a_corridor</span><span class="p">(</span><span class="n">corridors</span><span class="p">,</span><span class="n">reachable_loc</span><span class="p">,</span><span class="n">goal_loc</span><span class="p">)</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;The &quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="s2">&quot;location goal&quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot; is : &quot;</span><span class="p">)</span>
+
+                <span class="n">plan</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">goal_loc</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">plan</span><span class="p">)</span>
+
+        <span class="k">else</span> <span class="p">:</span> <span class="c1"># if there are no urgent locations, then go in a corridor</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;there are &quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTCYAN_EX</span> <span class="o">+</span> <span class="s2">&quot;no urgent location&quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot; at moment&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;Go in a &quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="s2">&quot;reachable corridor &quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">go_in_a_corridor</span><span class="p">(</span><span class="n">corridors</span><span class="p">,</span><span class="n">reachable_loc</span><span class="p">,</span><span class="n">goal_loc</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;The &quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="s2">&quot;location goal&quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot; is : &quot;</span><span class="p">,</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+            <span class="n">plan</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">goal_loc</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">Location</span><span class="p">(</span><span class="n">plan</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="Handler.search_charging_location"><a class="viewcode-back" href="../../../index.html#utilities.exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.search_charging_location">[docs]</a>    <span class="k">def</span> <span class="nf">search_charging_location</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method is used to search the charging location,</span>
+<span class="sd">        when the robot is in the low battery mode.</span>
+<span class="sd">        Therefore the robot has to go in the charging location.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">          target (Location) : the next location to reach when the robot has a low battery level</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTCYAN_EX</span> <span class="o">+</span> <span class="s2">&quot;Searching the charging location...&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+
+        <span class="c1"># location that the robot can reach </span>
+        <span class="n">reachable_loc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_reach</span><span class="p">()</span>
+
+        <span class="c1"># corridors</span>
+        <span class="n">corridors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">corridor</span><span class="p">()</span>
+        
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;the robot can reach the following locations : &quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">reachable_loc</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTRED_EX</span> <span class="o">+</span> <span class="s2">&quot;corridors&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot; are : &quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">corridors</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        
+        <span class="c1"># check if among the reachable locations, </span>
+        <span class="c1"># there is the charging location</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reachable_loc</span><span class="p">)):</span>
+
+            <span class="k">if</span> <span class="n">reachable_loc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">charging_loc</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+
+                <span class="n">target</span> <span class="o">=</span> <span class="n">reachable_loc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+                <span class="nb">print</span><span class="p">()</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTCYAN_EX</span> <span class="o">+</span> <span class="s2">&quot;Charging Location found !!!&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">()</span>
+
+                <span class="k">return</span> <span class="n">Location</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">reachable_corridors</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># if the charging location is not reachable,</span>
+        <span class="c1"># then go in a reachable corridor and continue</span>
+        <span class="c1"># to search the charging location</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;Charging Location not found&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reachable_loc</span><span class="p">)):</span>
+
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">corridors</span><span class="p">)):</span>
+
+                    <span class="k">if</span> <span class="n">reachable_loc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">corridors</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+
+                        <span class="n">reachable_corridors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reachable_loc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+            <span class="c1"># if no corridor is reachable, go in a random reachable location</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">reachable_corridors</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;Go in a random reachable location&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+                <span class="n">target</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">reachable_loc</span><span class="p">)</span>
+
+                <span class="k">return</span> <span class="n">Location</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+            
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTYELLOW_EX</span> <span class="o">+</span> <span class="s2">&quot;Go in a corridor&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+                <span class="n">target</span><span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">reachable_corridors</span><span class="p">)</span>
+
+                <span class="k">return</span> <span class="n">Location</span><span class="p">(</span><span class="n">target</span><span class="p">)</span></div></div>
+
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Gabriele Russo.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>exproblab_assignment1_russo_gabriele package &mdash; ExpRobLab assignment 1 2.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js?v=73cda6fb"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            ExpRobLab assignment 1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">exproblab_assignment1_russo_gabriele package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-exproblab_assignment1_russo_gabriele.architecture_names">Architecture Names Module</a><ul>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.architecture_names.tag_log"><code class="docutils literal notranslate"><span class="pre">tag_log()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-exproblab_assignment1_russo_gabriele.state_machine_interface">State Machine Interface Module</a><ul>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper"><code class="docutils literal notranslate"><span class="pre">ActionClientHelper</span></code></a><ul>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper._done_callback"><code class="docutils literal notranslate"><span class="pre">ActionClientHelper._done_callback()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper._feedback_callback"><code class="docutils literal notranslate"><span class="pre">ActionClientHelper._feedback_callback()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.cancel_goals"><code class="docutils literal notranslate"><span class="pre">ActionClientHelper.cancel_goals()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.get_results"><code class="docutils literal notranslate"><span class="pre">ActionClientHelper.get_results()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.is_done"><code class="docutils literal notranslate"><span class="pre">ActionClientHelper.is_done()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.is_running"><code class="docutils literal notranslate"><span class="pre">ActionClientHelper.is_running()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.reset_client_states"><code class="docutils literal notranslate"><span class="pre">ActionClientHelper.reset_client_states()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.send_goal"><code class="docutils literal notranslate"><span class="pre">ActionClientHelper.send_goal()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler"><code class="docutils literal notranslate"><span class="pre">Handler</span></code></a><ul>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler._battery_callback"><code class="docutils literal notranslate"><span class="pre">Handler._battery_callback()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.add_corridors"><code class="docutils literal notranslate"><span class="pre">Handler.add_corridors()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.add_rooms"><code class="docutils literal notranslate"><span class="pre">Handler.add_rooms()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.ask_rob_pos"><code class="docutils literal notranslate"><span class="pre">Handler.ask_rob_pos()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.can_reach"><code class="docutils literal notranslate"><span class="pre">Handler.can_reach()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.change_urg_th"><code class="docutils literal notranslate"><span class="pre">Handler.change_urg_th()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.corridor"><code class="docutils literal notranslate"><span class="pre">Handler.corridor()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.disjoint"><code class="docutils literal notranslate"><span class="pre">Handler.disjoint()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.get_time"><code class="docutils literal notranslate"><span class="pre">Handler.get_time()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.go_in_a_corridor"><code class="docutils literal notranslate"><span class="pre">Handler.go_in_a_corridor()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.init_client"><code class="docutils literal notranslate"><span class="pre">Handler.init_client()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.init_rob_pos"><code class="docutils literal notranslate"><span class="pre">Handler.init_rob_pos()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.is_battery_low"><code class="docutils literal notranslate"><span class="pre">Handler.is_battery_low()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.loc_visit_time"><code class="docutils literal notranslate"><span class="pre">Handler.loc_visit_time()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.map_creation"><code class="docutils literal notranslate"><span class="pre">Handler.map_creation()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.reasoner"><code class="docutils literal notranslate"><span class="pre">Handler.reasoner()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.reset_states"><code class="docutils literal notranslate"><span class="pre">Handler.reset_states()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.search_charging_location"><code class="docutils literal notranslate"><span class="pre">Handler.search_charging_location()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.set_map"><code class="docutils literal notranslate"><span class="pre">Handler.set_map()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.set_starting_flag"><code class="docutils literal notranslate"><span class="pre">Handler.set_starting_flag()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.target_location"><code class="docutils literal notranslate"><span class="pre">Handler.target_location()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.update_location_time"><code class="docutils literal notranslate"><span class="pre">Handler.update_location_time()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.update_robot_position"><code class="docutils literal notranslate"><span class="pre">Handler.update_robot_position()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.update_robot_time"><code class="docutils literal notranslate"><span class="pre">Handler.update_robot_time()</span></code></a></li>
+<li><a class="reference internal" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.urgent"><code class="docutils literal notranslate"><span class="pre">Handler.urgent()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-exproblab_assignment1_russo_gabriele">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">ExpRobLab assignment 1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">exproblab_assignment1_russo_gabriele package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/exproblab_assignment1_russo_gabriele.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="exproblab-assignment1-russo-gabriele-package">
+<h1>exproblab_assignment1_russo_gabriele package<a class="headerlink" href="#exproblab-assignment1-russo-gabriele-package" title="Permalink to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading"></a></h2>
+</section>
+<section id="module-exproblab_assignment1_russo_gabriele.architecture_names">
+<span id="architecture-names-module"></span><h2>Architecture Names Module<a class="headerlink" href="#module-exproblab_assignment1_russo_gabriele.architecture_names" title="Permalink to this heading"></a></h2>
+<span class="target" id="module-architecture_names"></span><p>it implements a ‘dictionary’ that defines names and a function for logging used among all the components of the architecture of this assignment.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.architecture_names.tag_log">
+<span class="sig-prename descclassname"><span class="pre">exproblab_assignment1_russo_gabriele.architecture_names.</span></span><span class="sig-name descname"><span class="pre">tag_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">producer_tag</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/architecture_names.html#tag_log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.architecture_names.tag_log" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-exproblab_assignment1_russo_gabriele.state_machine_interface">
+<span id="state-machine-interface-module"></span><h2>State Machine Interface Module<a class="headerlink" href="#module-exproblab_assignment1_russo_gabriele.state_machine_interface" title="Permalink to this heading"></a></h2>
+<span class="target" id="module-state_machine_interface"></span><p>This module implements an interaface used to handle the comunication between
+the state machine node and the other components of the architecture but it also
+contains functions used by the state machine node to compute data and to interact
+with the ontology through the Armor server</p>
+<dl>
+<dt>ROS Parameters:</dt><dd><p><strong>/starting_map</strong> starting map file (it has the Ontology skeleton )</p>
+<p><strong>/operative_map</strong> is the file where the final map (and the complete ontology) will be loaded</p>
+<p><strong>/location_property</strong> property “hasDoor” associated to a location (room and corridor)</p>
+<p><strong>/robot_property</strong> property “isIn” to get or set the robot position in the map</p>
+<p><strong>/now_property</strong> property “now” is a robot time property</p>
+<p><strong>/urgent_property</strong> property “urgencyThreshold” to change the urgency threshold, associated to the locations</p>
+<p><strong>/visited_property</strong> property “visitedAt” used to change the timestamp of a location, when the robot visits it</p>
+<p><strong>/canreach_property</strong> property “canReach” to get the locations that the robot can reach</p>
+<p><strong>/robot_name</strong> the name that identify the robot</p>
+<p><strong>/charging_location</strong> the name of the location where is the charging station</p>
+</dd>
+<dt>Subscriber:</dt><dd><p><strong>/state/battery_low</strong> receives from the robot state node the robot battery level</p>
+</dd>
+<dt>Service:</dt><dd><p><strong>/inteface/start_charging</strong> sends to the robot state node, the value of the start charging flag, as service request, in order to handle the robot charging process .</p>
+</dd>
+<dt>Action Client:</dt><dd><p><strong>/motion/controller</strong> sends to the controller node the path plan as goal, and receives the final location reached as result.</p>
+<p><strong>/motion/planner</strong> sends to the planner node the new location to reach as goal, and receives the path plan to reach the new location as result.</p>
+</dd>
+</dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">exproblab_assignment1_russo_gabriele.state_machine_interface.</span></span><span class="sig-name descname"><span class="pre">ActionClientHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">done_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feedback_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#ActionClientHelper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A class to simplify the implementation of a
+simple action client for ROS action servers.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper._done_callback">
+<span class="sig-name descname"><span class="pre">_done_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#ActionClientHelper._done_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper._done_callback" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when the action server finish its computation,
+i.e., it provides a <cite>done</cite> message.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper._feedback_callback">
+<span class="sig-name descname"><span class="pre">_feedback_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feedback</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#ActionClientHelper._feedback_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper._feedback_callback" title="Permalink to this definition"></a></dt>
+<dd><p>This function is called when the action server send some <cite>feedback</cite> to the client.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.cancel_goals">
+<span class="sig-name descname"><span class="pre">cancel_goals</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#ActionClientHelper.cancel_goals"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.cancel_goals" title="Permalink to this definition"></a></dt>
+<dd><p>Stop the computation of the action server (cancels the goal sent).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.get_results">
+<span class="sig-name descname"><span class="pre">get_results</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#ActionClientHelper.get_results"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.get_results" title="Permalink to this definition"></a></dt>
+<dd><p>Get the results of the action server, if any, or <cite>None</cite>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.is_done">
+<span class="sig-name descname"><span class="pre">is_done</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#ActionClientHelper.is_done"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.is_done" title="Permalink to this definition"></a></dt>
+<dd><p>Get <cite>True</cite> if the action server finished is computation, or <cite>False</cite> otherwise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.is_running">
+<span class="sig-name descname"><span class="pre">is_running</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#ActionClientHelper.is_running"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.is_running" title="Permalink to this definition"></a></dt>
+<dd><p>Get <cite>True</cite> if the action server is running, or <cite>False</cite> otherwise.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.reset_client_states">
+<span class="sig-name descname"><span class="pre">reset_client_states</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#ActionClientHelper.reset_client_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.reset_client_states" title="Permalink to this definition"></a></dt>
+<dd><p>Reset the client state variables stored in this class.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.send_goal">
+<span class="sig-name descname"><span class="pre">send_goal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">goal</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#ActionClientHelper.send_goal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.ActionClientHelper.send_goal" title="Permalink to this definition"></a></dt>
+<dd><p>Start the action server with a new <cite>goal</cite>.
+Note: this call is not blocking (i.e., asynchronous performed).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">exproblab_assignment1_russo_gabriele.state_machine_interface.</span></span><span class="sig-name descname"><span class="pre">Handler</span></span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>The class Handler is used as an interface of the state machine to handle
+the comunication with the other nodes but also to contains function used by
+the state machine to compute data, for instance the creation of the ontology
+and the retrieving of information from the ontology itself.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler._battery_callback">
+<span class="sig-name descname"><span class="pre">_battery_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler._battery_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler._battery_callback" title="Permalink to this definition"></a></dt>
+<dd><p>The subscriber to get messages published from the <cite>robot-state</cite> node
+into the <cite>/state/battery_low/</cite> topic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>msg</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – the battery level value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.add_corridors">
+<span class="sig-name descname"><span class="pre">add_corridors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.add_corridors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.add_corridors" title="Permalink to this definition"></a></dt>
+<dd><p>This method adds locations in the CORRIDOR subclass,
+so it adds corridors in the ontology.
+Note: a location to be a corridor must have at least two doors</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.add_rooms">
+<span class="sig-name descname"><span class="pre">add_rooms</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.add_rooms"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.add_rooms" title="Permalink to this definition"></a></dt>
+<dd><p>This method adds locations in the ROOM subclass,
+so it adds rooms in the ontology.
+Note: a location to be a room must have maximum one door</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.ask_rob_pos">
+<span class="sig-name descname"><span class="pre">ask_rob_pos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.ask_rob_pos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.ask_rob_pos" title="Permalink to this definition"></a></dt>
+<dd><p>This method returns the current robot position</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>current robot position</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>rob_pos (string)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.can_reach">
+<span class="sig-name descname"><span class="pre">can_reach</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.can_reach"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.can_reach" title="Permalink to this definition"></a></dt>
+<dd><p>This method returns the locations connected
+to the location where the robot is, then
+the locations that the robot can reach.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Locations that the robot can reach</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>reachable (string)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.change_urg_th">
+<span class="sig-name descname"><span class="pre">change_urg_th</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.change_urg_th"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.change_urg_th" title="Permalink to this definition"></a></dt>
+<dd><p>This method allows the user to change the location urgency threshold.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.corridor">
+<span class="sig-name descname"><span class="pre">corridor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.corridor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.corridor" title="Permalink to this definition"></a></dt>
+<dd><p>This method returns the list of corridors</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of corridors</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>corridor (string)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.disjoint">
+<span class="sig-name descname"><span class="pre">disjoint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.disjoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.disjoint" title="Permalink to this definition"></a></dt>
+<dd><p>This method disjoint all the individuals</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.get_time">
+<span class="sig-name descname"><span class="pre">get_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.get_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.get_time" title="Permalink to this definition"></a></dt>
+<dd><p>This method gets the current time
+in order to update the timestamps</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the current time</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>now</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.go_in_a_corridor">
+<span class="sig-name descname"><span class="pre">go_in_a_corridor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">corr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">can_reach</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.go_in_a_corridor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.go_in_a_corridor" title="Permalink to this definition"></a></dt>
+<dd><p>This method seach a corridor among the reachable locations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.init_client">
+<span class="sig-name descname"><span class="pre">init_client</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.init_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.init_client" title="Permalink to this definition"></a></dt>
+<dd><p>This method initialize the armor client,
+used to load and to communicate with the ontology</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Armor client identifier</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>client</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.init_rob_pos">
+<span class="sig-name descname"><span class="pre">init_rob_pos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.init_rob_pos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.init_rob_pos" title="Permalink to this definition"></a></dt>
+<dd><p>This method allows the user to choose the initial position
+among the inserted locations.
+For this assignment the initial position is the corridor E</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.is_battery_low">
+<span class="sig-name descname"><span class="pre">is_battery_low</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.is_battery_low"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.is_battery_low" title="Permalink to this definition"></a></dt>
+<dd><p>Get the state variable encoded in this class that concerns the battery level.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>battery level. ‘True’ if the battery is low, ‘False’ otherwise.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>self._battery_low (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)">bool</a>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.loc_visit_time">
+<span class="sig-name descname"><span class="pre">loc_visit_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.loc_visit_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.loc_visit_time" title="Permalink to this definition"></a></dt>
+<dd><p>This method initializes the locations visited time</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.map_creation">
+<span class="sig-name descname"><span class="pre">map_creation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.map_creation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.map_creation" title="Permalink to this definition"></a></dt>
+<dd><p>This method uses the ‘add_corridors’ and ‘add_rooms’
+methods to allow the user to create the map</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.reasoner">
+<span class="sig-name descname"><span class="pre">reasoner</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.reasoner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.reasoner" title="Permalink to this definition"></a></dt>
+<dd><p>Activate the reasoner</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.reset_states">
+<span class="sig-name descname"><span class="pre">reset_states</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.reset_states"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.reset_states" title="Permalink to this definition"></a></dt>
+<dd><p>Reset the states variable (_battery_low, found and low_battery_mode).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.search_charging_location">
+<span class="sig-name descname"><span class="pre">search_charging_location</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.search_charging_location"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.search_charging_location" title="Permalink to this definition"></a></dt>
+<dd><p>This method is used to search the charging location,
+when the robot is in the low battery mode.
+Therefore the robot has to go in the charging location.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the next location to reach when the robot has a low battery level</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>target (Location)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.set_map">
+<span class="sig-name descname"><span class="pre">set_map</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.set_map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.set_map" title="Permalink to this definition"></a></dt>
+<dd><p>This method create the map using the ‘map_creation()’ method
+and set all the other main parameters through the previous
+methods of this section</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.set_starting_flag">
+<span class="sig-name descname"><span class="pre">set_starting_flag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feedback</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.set_starting_flag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.set_starting_flag" title="Permalink to this definition"></a></dt>
+<dd><p>Update the start charging flag stored in the ‘robot-state’ node.
+This method is used to say if the robot state can change the battery level
+in order to start the charging battery simulation only when the robot has
+reached the charging location.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>feedback</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><em>bool</em></a>) – the value of the start charging flag. If it is ‘True’ the robot can start the charging process, ‘False’ the robot has to wait.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.target_location">
+<span class="sig-name descname"><span class="pre">target_location</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.target_location"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.target_location" title="Permalink to this definition"></a></dt>
+<dd><p>This method returns the target location,
+i.e. the location that the robot should reach
+considering the corridors, the urgent locations and
+obviously the reachable locations</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>the next location to reach</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>plan (Location)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.update_location_time">
+<span class="sig-name descname"><span class="pre">update_location_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_loc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.update_location_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.update_location_time" title="Permalink to this definition"></a></dt>
+<dd><p>This method updates the location time</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.update_robot_position">
+<span class="sig-name descname"><span class="pre">update_robot_position</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_loc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_loc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.update_robot_position"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.update_robot_position" title="Permalink to this definition"></a></dt>
+<dd><p>This method updates the robot position</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.update_robot_time">
+<span class="sig-name descname"><span class="pre">update_robot_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.update_robot_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.update_robot_time" title="Permalink to this definition"></a></dt>
+<dd><p>This method updates the robot time</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.urgent">
+<span class="sig-name descname"><span class="pre">urgent</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/exproblab_assignment1_russo_gabriele/state_machine_interface.html#Handler.urgent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#exproblab_assignment1_russo_gabriele.state_machine_interface.Handler.urgent" title="Permalink to this definition"></a></dt>
+<dd><p>This method returns the urgent locations to visit</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Urgent locations to visit</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>urgent (string)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-exproblab_assignment1_russo_gabriele">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-exproblab_assignment1_russo_gabriele" title="Permalink to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Gabriele Russo.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

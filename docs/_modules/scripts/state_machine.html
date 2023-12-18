@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scripts.state_machine &mdash; ExpRobLab assignment 1 2.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js?v=73cda6fb"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=4825356b"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ExpRobLab assignment 1
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ExpRobLab assignment 1</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">scripts.state_machine</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scripts.state_machine</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. module:: state_machine       </span>
+<span class="sd">   :platform: Ubuntu 20.04</span>
+<span class="sd">   :synopsis: Python module which implements the Final State Machine of the architecture.</span>
+
+<span class="sd">.. moduleauthor:: Gabriele Russo &lt;gabriele.russo117@gmail.com&gt;</span>
+
+<span class="sd">This module manages the Finite State Machine (FSM) of the architecture, </span>
+<span class="sd">which is implemented by using The `ROS SMACH library &lt;http://wiki.ros.org/smach&gt;`_.</span>
+<span class="sd">States are non-concurrent and updated at a rate defined by the LOOP_SLEEP_TIME global variable.</span>
+
+<span class="sd">ROS Parameters:</span>
+<span class="sd">  **/waiting_time** the waiting time used to simulate that the robot does something when is in the reached location. \n</span>
+
+<span class="sd">Service:</span>
+<span class="sd">  **/state/set_pose** sends the initial robot position to the robot state node .\n</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="c1"># Import a class that is an interface of the state machine, used to handle </span>
+<span class="c1"># the comunication with the other nodes but also to contains function used by</span>
+<span class="c1"># the state machine to compute data, for instance the creation of the ontology</span>
+<span class="c1"># and the retrieving of information from the ontology itself.</span>
+<span class="kn">from</span> <span class="nn">exproblab_assignment1_russo_gabriele.state_machine_interface</span> <span class="kn">import</span> <span class="n">Handler</span>
+
+<span class="c1"># Imports relative to ROS and the SMACH library.</span>
+<span class="kn">import</span> <span class="nn">rospy</span>
+<span class="kn">import</span> <span class="nn">smach_ros</span>
+<span class="kn">from</span> <span class="nn">smach</span> <span class="kn">import</span> <span class="n">StateMachine</span><span class="p">,</span> <span class="n">State</span>
+
+<span class="c1"># Import constant names that define the architecture&#39;s structure.</span>
+<span class="kn">from</span> <span class="nn">exproblab_assignment1_russo_gabriele</span> <span class="kn">import</span> <span class="n">architecture_names</span> <span class="k">as</span> <span class="n">anm</span>
+
+<span class="c1"># Import custom message, actions and services.</span>
+<span class="kn">from</span> <span class="nn">exproblab_assignment1_russo_gabriele.msg</span> <span class="kn">import</span> <span class="n">Location</span><span class="p">,</span> <span class="n">PlanAction</span><span class="p">,</span> <span class="n">PlanGoal</span><span class="p">,</span> <span class="n">ControlAction</span><span class="p">,</span> <span class="n">ControlGoal</span><span class="p">,</span> <span class="n">ControlResult</span>
+<span class="kn">from</span> <span class="nn">exproblab_assignment1_russo_gabriele.srv</span> <span class="kn">import</span> <span class="n">NewPosition</span>
+
+<span class="c1"># Sleeping time (in seconds) of the waiting thread to allow the computations</span>
+<span class="c1"># for getting stimulus from the other components of the architecture.</span>
+<span class="n">LOOP_SLEEP_TIME</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="c1"># A tag for identifying logs producer.</span>
+<span class="n">LOG_TAG</span> <span class="o">=</span> <span class="n">anm</span><span class="o">.</span><span class="n">NODE_STATEMACHINE</span>
+
+<span class="c1"># to color the text</span>
+<span class="kn">import</span> <span class="nn">colorama</span>
+<span class="kn">from</span> <span class="nn">colorama</span> <span class="kn">import</span> <span class="n">Fore</span>
+
+<span class="c1"># The list of names that identify the states of the Finite State Machine.</span>
+<span class="n">STATE_RECHARGING</span> <span class="o">=</span> <span class="s1">&#39;RECHARGING&#39;</span>             <span class="c1"># The name of the state where the robot waits to recharging its battery.</span>
+<span class="n">STATE_WAIT_FOR_TOP_MAP</span> <span class="o">=</span> <span class="s1">&#39;WAIT_FOR_TOP_MAP&#39;</span> <span class="c1"># The name of the initial state where the robot waits in the room E for the topological map.</span>
+<span class="n">STATE_WAIT</span> <span class="o">=</span> <span class="s1">&#39;WAIT&#39;</span>                         <span class="c1"># The name of the state where the robot waits in the room after reached it.</span>
+<span class="n">STATE_PLANNING</span> <span class="o">=</span> <span class="s1">&#39;PLANNING&#39;</span>                 <span class="c1"># The name of the state where the robot plans what is the next location to visit.</span>
+<span class="n">STATE_MOVING</span> <span class="o">=</span> <span class="s1">&#39;MOVING&#39;</span>                     <span class="c1"># The name of the state where the robot moves toward a location.</span>
+
+<span class="c1"># The list of names that identify the transitions of the Finite State Machine.</span>
+<span class="n">TRANS_BATTERY_LOW</span> <span class="o">=</span> <span class="s1">&#39;battery_low&#39;</span>                    <span class="c1"># The transition from the &#39;PLANNING&#39;, &#39;MOVING&#39; and &#39;WAIT&#39; states toward the `RECHARGING` state.</span>
+<span class="n">TRANS_CHARGED_BATTERY</span> <span class="o">=</span> <span class="s1">&#39;charged_battery&#39;</span>            <span class="c1"># The transition from the &#39;RECHARGING&#39; state to the &#39;PLANNING&#39; state.</span>
+<span class="n">TRANS_NO_TOP_MAP</span> <span class="o">=</span> <span class="s1">&#39;no_top_map&#39;</span>                      <span class="c1"># The transition from the &#39;WAIT_FOR_TOP_MAP&#39; to itself.</span>
+<span class="n">TRANS_TOP_MAP_READY</span> <span class="o">=</span> <span class="s1">&#39;top_map_ready&#39;</span>                <span class="c1"># The transition from the &#39;WAIT_FOR_TOP_MAP&#39; to &#39;PLANNING&#39; state. </span>
+<span class="n">TRANS_IN_A_ROOM</span> <span class="o">=</span> <span class="s1">&#39;in_a_room&#39;</span>                        <span class="c1"># The transition from the &#39;MOVING&#39; to &#39;WAIT&#39; state.</span>
+<span class="n">TRANS_TIMEOUT</span> <span class="o">=</span> <span class="s1">&#39;timeout&#39;</span>                            <span class="c1"># The transition from the &#39;WAIT&#39; to &#39;PLANNING&#39; state.</span>
+<span class="n">TRANS_MOVING</span> <span class="o">=</span> <span class="s1">&#39;moving&#39;</span>                              <span class="c1"># The transition from the &#39;PLANNING&#39; to &#39;MOVING&#39; state.</span>
+<span class="n">TRANS_SEARCH_CHARG_LOC</span> <span class="o">=</span> <span class="s1">&#39;search_charging_location&#39;</span>  <span class="c1"># The transition from the &#39;RECHARGING&#39; to &#39;PLANNING&#39; state.</span>
+
+<span class="c1"># variable passed from the PLANNING state to the MOVING state</span>
+<span class="n">VAR_PLAN</span> <span class="o">=</span> <span class="s1">&#39;plan&#39;</span>  
+
+<span class="c1"># Sleeping time (in seconds) of the waiting thread to allow the computations</span>
+<span class="c1"># for getting stimulus from the other components of the architecture.</span>
+<span class="n">LOOP_SLEEP_TIME</span> <span class="o">=</span> <span class="mf">0.3</span>
+
+<div class="viewcode-block" id="WaitForTopMap"><a class="viewcode-back" href="../../index.html#scripts.state_machine.WaitForTopMap">[docs]</a><span class="k">class</span> <span class="nc">WaitForTopMap</span><span class="p">(</span><span class="n">State</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The definition of the wait_for_top_map state.</span>
+<span class="sd">    It is the state where the robot waits that the </span>
+<span class="sd">    map (creation of the ontology) is ready.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Construct this class, i.e., initialize this state.</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_machine_interface</span><span class="p">):</span>
+
+        <span class="c1"># Get a reference to the interface with the other nodes of the architecture.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span> <span class="o">=</span> <span class="n">state_machine_interface</span>
+
+        <span class="c1"># Initialize this state with possible transitions (i.e., valid outputs of the `execute` function).</span>
+        <span class="n">State</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcomes</span><span class="o">=</span><span class="p">[</span><span class="n">TRANS_NO_TOP_MAP</span><span class="p">,</span> <span class="n">TRANS_TOP_MAP_READY</span><span class="p">])</span>
+
+    <span class="c1"># Define the function performed each time the state machine enter in this state,</span>
+    <span class="c1"># thanks to a proper transition.</span>
+<div class="viewcode-block" id="WaitForTopMap.execute"><a class="viewcode-back" href="../../index.html#scripts.state_machine.WaitForTopMap.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userdata</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function performed each time the state machine enter in the Wait_For_Top_Map state.</span>
+<span class="sd">        It creates the map and sets all the important parameter of the ontology.</span>
+<span class="sd">        Once the map is ready, it sends the starting position to the robot state node (through the /state/set_pose)</span>
+<span class="sd">        and goes in the next state (Planning state) through the &#39;top_map_ready&#39; transition, otherwise,</span>
+<span class="sd">        it continues to wait that the map is ready (&#39;no_top_map&#39; transition).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+         
+        <span class="c1"># Wait for stimulus from the other nodes of the architecture.</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">rospy</span><span class="o">.</span><span class="n">is_shutdown</span><span class="p">():</span>  
+
+            <span class="c1"># Acquire the mutex to assure data consistencies </span>
+            <span class="c1"># with the ROS subscription threads managed by `self._interface`.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                
+                <span class="c1"># Wait the server to set the starting robot position</span>
+                <span class="c1"># in the robot state node</span>
+                <span class="n">rospy</span><span class="o">.</span><span class="n">wait_for_service</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">SERVER_SET_POSE</span><span class="p">)</span>
+
+                <span class="c1"># method of the class Handler that create the map and set</span>
+                <span class="c1"># all the important parameter of the ontology</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">set_map</span><span class="p">()</span>
+
+                <span class="c1"># send the starting robot position to the robot state node.</span>
+                <span class="n">start_pos</span> <span class="o">=</span> <span class="n">Location</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">_init_pos</span><span class="p">)</span>
+                <span class="n">service</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">ServiceProxy</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">SERVER_SET_POSE</span><span class="p">,</span> <span class="n">NewPosition</span><span class="p">)</span>
+                <span class="n">service</span><span class="p">(</span><span class="n">start_pos</span><span class="p">)</span>  <span class="c1"># The `response` is not used.</span>
+
+                <span class="c1"># if the map is ready go in the planning state, </span>
+                <span class="c1"># through the TRANS_TOP_MAP_READY</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">end</span><span class="p">:</span>
+
+                    <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">YELLOW</span> <span class="o">+</span> <span class="s2">&quot;the map is ready&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+                    <span class="k">return</span> <span class="n">TRANS_TOP_MAP_READY</span>
+                
+                <span class="k">else</span><span class="p">:</span>
+
+                    <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">YELLOW</span> <span class="o">+</span> <span class="s2">&quot;the map is not ready&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+                    <span class="k">return</span> <span class="n">TRANS_NO_TOP_MAP</span>
+                
+            <span class="k">finally</span><span class="p">:</span>
+
+                <span class="c1"># Release the mutex to unblock the `self._interface` </span>
+                <span class="c1"># subscription threads if they are waiting.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+            <span class="c1"># Wait for a reasonably small amount of time to allow </span>
+            <span class="c1"># `self._interface` processing stimulus (eventually).</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">LOOP_SLEEP_TIME</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="Planning"><a class="viewcode-back" href="../../index.html#scripts.state_machine.Planning">[docs]</a><span class="k">class</span> <span class="nc">Planning</span><span class="p">(</span><span class="n">State</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The definition of the Planning state.</span>
+<span class="sd">    It is the state where the robot plans </span>
+<span class="sd">    the next position that has to be reached</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Construct this class, i.e., initialize this state.</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">state_machine_interface</span><span class="p">):</span>
+
+        <span class="c1"># Get a reference to the interface with the other nodes of the architecture.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span> <span class="o">=</span> <span class="n">state_machine_interface</span>
+
+        <span class="c1"># Initialize this state with possible transitions (i.e., valid outputs of the `execute` function).</span>
+        <span class="n">State</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcomes</span><span class="o">=</span><span class="p">[</span><span class="n">TRANS_MOVING</span><span class="p">,</span> <span class="n">TRANS_CHARGED_BATTERY</span><span class="p">,</span> <span class="n">TRANS_SEARCH_CHARG_LOC</span><span class="p">,</span>
+                                       <span class="n">TRANS_TOP_MAP_READY</span><span class="p">,</span> <span class="n">TRANS_TIMEOUT</span><span class="p">,</span><span class="n">TRANS_BATTERY_LOW</span><span class="p">],</span> <span class="n">output_keys</span><span class="o">=</span><span class="p">[</span><span class="n">VAR_PLAN</span><span class="p">])</span>
+
+    <span class="c1"># Define the function performed each time the state machine enter in this state,</span>
+    <span class="c1"># thanks to a proper transition.</span>
+<div class="viewcode-block" id="Planning.execute"><a class="viewcode-back" href="../../index.html#scripts.state_machine.Planning.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userdata</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function performed each time the state machine enter in the Planning state.</span>
+<span class="sd">        It checks if the robot is in the low battery mode, if the low battery mode is active</span>
+<span class="sd">        the planning state plans how to reach the charging location, otherwise, it plans how to reach</span>
+<span class="sd">        the next location (which can be an urgent location and/or a corridor).</span>
+<span class="sd">        The low battery mode is active when the robot has a low battery level and it is not in the</span>
+<span class="sd">        charging location when the battery gets low level.</span>
+<span class="sd">        Once the plan is ready, the planning state, using the Handler class as interface, sends </span>
+<span class="sd">        the target location as goal to the Action server (the planner node).</span>
+<span class="sd">        If during this process, the battery gets low level and the robot is not in the low battery mode</span>
+<span class="sd">        the goal (the next location to reach) is cancelled and there is the transition from the planning to recharging</span>
+<span class="sd">        state (low_battery transition).</span>
+<span class="sd">        Instead, if the battery level is not low or if the robot is in the low battery mode, the state waits that</span>
+<span class="sd">        the action server (planner node) has finished and so, that the plan is ready.</span>
+<span class="sd">        Then the plan is sent to the moving state using the &#39;userdata&#39; and lastly there is the transition from</span>
+<span class="sd">        the planning state to the moving state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># disjoint all the individuals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">disjoint</span><span class="p">()</span>
+
+        <span class="c1"># activate the reasoner </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">reasoner</span><span class="p">()</span>
+
+        <span class="c1"># get the actual robot position</span>
+        <span class="n">actual_pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">ask_rob_pos</span><span class="p">()</span>
+    
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTBLUE_EX</span> <span class="o">+</span> <span class="s2">&quot;The current robot position is :&quot;</span><span class="p">,</span> <span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">actual_pos</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">()</span>
+
+        <span class="n">goal</span> <span class="o">=</span> <span class="n">PlanGoal</span><span class="p">()</span>
+
+        <span class="c1"># if the the robot is in the low battery mode, </span>
+        <span class="c1"># then search the charging location, otherwise </span>
+        <span class="c1"># compute the target location that the robot has to reach</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">low_battery_mode</span><span class="p">:</span>
+
+            <span class="n">goal</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">search_charging_location</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            
+            <span class="n">goal</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">target_location</span><span class="p">()</span>
+
+        <span class="c1"># send the goal to the planner action server.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">planner_client</span><span class="o">.</span><span class="n">send_goal</span><span class="p">(</span><span class="n">goal</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTMAGENTA_EX</span><span class="p">)</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="s1">&#39;Planning to go in a new random position...&#39;</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+        <span class="c1"># Wait for stimulus from the other nodes of the architecture.</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">rospy</span><span class="o">.</span><span class="n">is_shutdown</span><span class="p">():</span>  
+
+            <span class="c1"># Acquire the mutex to assure data consistencies with the </span>
+            <span class="c1"># ROS subscription threads managed by `self._interface`.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+
+            <span class="k">try</span><span class="p">:</span>
+
+                <span class="c1"># if the robot battery is low and the robot is not yet in </span>
+                <span class="c1"># the low battery mode, cancel the actual goal and go in the </span>
+                <span class="c1"># Recharging state thanks to the TRANS_BATTERY_LOW</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">is_battery_low</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">low_battery_mode</span><span class="p">:</span>  
+                    
+                    <span class="c1"># cancel the goal</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">planner_client</span><span class="o">.</span><span class="n">cancel_goals</span><span class="p">()</span>
+
+                    <span class="k">return</span> <span class="n">TRANS_BATTERY_LOW</span>
+                
+                <span class="c1"># if the robot has no low battery level and the planner node </span>
+                <span class="c1"># has finished to evaluate the plan, then take the plan to </span>
+                <span class="c1"># pass to the Moving state and go to the Moving state </span>
+                <span class="c1"># thanks to the TRANS_MOVING</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">planner_client</span><span class="o">.</span><span class="n">is_done</span><span class="p">():</span>
+
+                    <span class="n">userdata</span><span class="o">.</span><span class="n">plan</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">planner_client</span><span class="o">.</span><span class="n">get_results</span><span class="p">()</span><span class="o">.</span><span class="n">plan</span> <span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+                    <span class="k">return</span> <span class="n">TRANS_MOVING</span>
+                
+            <span class="k">finally</span><span class="p">:</span>
+
+                <span class="c1"># Release the mutex to unblock the `self._interface` </span>
+                <span class="c1"># subscription threads if they are waiting.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+            <span class="c1"># Wait for a reasonably small amount of time to allow</span>
+            <span class="c1"># `self._interface` processing stimulus (eventually).</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">LOOP_SLEEP_TIME</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="Moving"><a class="viewcode-back" href="../../index.html#scripts.state_machine.Moving">[docs]</a><span class="k">class</span> <span class="nc">Moving</span><span class="p">(</span><span class="n">State</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The definition of the Moving state.</span>
+<span class="sd">    In this state the robot goes from the current location</span>
+<span class="sd">    to the target location, thanks to the Controller node.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Construct this class, i.e., initialize this state.</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">state_machine_interface</span><span class="p">):</span>
+
+        <span class="c1"># Get a reference to the interface with the other nodes of the architecture.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span> <span class="o">=</span> <span class="n">state_machine_interface</span>
+
+        <span class="c1"># Initialize this state with possible transitions (i.e., valid outputs of the `execute` function).</span>
+        <span class="n">State</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcomes</span><span class="o">=</span><span class="p">[</span><span class="n">TRANS_BATTERY_LOW</span><span class="p">,</span> <span class="n">TRANS_IN_A_ROOM</span><span class="p">,</span> 
+                                       <span class="n">TRANS_MOVING</span><span class="p">],</span> <span class="n">input_keys</span><span class="o">=</span><span class="p">[</span><span class="n">VAR_PLAN</span><span class="p">])</span>
+
+    <span class="c1"># Define the function performed each time the state machine enter in this state,</span>
+    <span class="c1"># thanks to a proper transition.</span>
+<div class="viewcode-block" id="Moving.execute"><a class="viewcode-back" href="../../index.html#scripts.state_machine.Moving.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userdata</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function performed each time the state machine enter in the Moving state.</span>
+<span class="sd">        The Moving state receives from the Planning state the variable plan which</span>
+<span class="sd">        is the target location to reach. This target location is sent to the controller</span>
+<span class="sd">        node (the action server) using the method of the class Handler.</span>
+<span class="sd">        If the battery gets a low level and the robot is not in the low battery mode</span>
+<span class="sd">        the goal (the plan for reach the target location) is cancelled and there is </span>
+<span class="sd">        the transition from the moving to recharging state (low_battery transition).</span>
+<span class="sd">        Instead, if the battery level is not low or if the robot is in the low battery mode,</span>
+<span class="sd">        the state waits that the controller action server is done and after that, it retrieves</span>
+<span class="sd">        the new location, as Action result, and then updates the robot position and the robot and</span>
+<span class="sd">        location timestamp.</span>
+<span class="sd">        Lastly, if the battery is low, the state machine goes in the Recharging state to check if</span>
+<span class="sd">        the controller moves the robot in the charging location (and charge the robot), otherwise</span>
+<span class="sd">        the state machine goes in the &#39;Wait&#39; state which simulate that the robot does something in the location.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># get thee current robot position that will be the </span>
+        <span class="c1"># old location once the robot starts to moving</span>
+        <span class="n">old_location</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">ask_rob_pos</span><span class="p">()</span>
+
+        <span class="c1"># Start the action server for moving the robot through the planned positions.</span>
+        <span class="n">control_goal</span> <span class="o">=</span> <span class="n">ControlGoal</span><span class="p">()</span>
+
+        <span class="c1"># plan given by the Planning state</span>
+        <span class="n">control_goal</span><span class="o">.</span><span class="n">plan</span> <span class="o">=</span> <span class="n">userdata</span><span class="o">.</span><span class="n">plan</span>
+
+        <span class="c1"># send the goal to the controller node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">controller_client</span><span class="o">.</span><span class="n">send_goal</span><span class="p">(</span><span class="n">control_goal</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTMAGENTA_EX</span><span class="p">)</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">anm</span><span class="o">.</span><span class="n">tag_log</span><span class="p">(</span><span class="s1">&#39;Following the plan to reach the target location...&#39;</span><span class="p">,</span> <span class="n">LOG_TAG</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+        <span class="c1"># Wait for stimulus from the other nodes of the architecture.</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">rospy</span><span class="o">.</span><span class="n">is_shutdown</span><span class="p">():</span>  
+
+            <span class="c1"># Acquire the mutex to assure data consistencies with the</span>
+            <span class="c1"># ROS subscription threads managed by `self._interface`.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+
+            <span class="k">try</span><span class="p">:</span>
+
+                <span class="c1"># if the robot battery is low and the robot is not yet in </span>
+                <span class="c1"># the low battery mode, cancel the actual goal and go in the </span>
+                <span class="c1"># Recharging state thanks to the TRANS_BATTERY_LOW</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">is_battery_low</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">low_battery_mode</span><span class="p">:</span>  
+                    
+                    <span class="c1"># cancel the actual goal</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">controller_client</span><span class="o">.</span><span class="n">cancel_goals</span><span class="p">()</span>
+
+                    <span class="k">return</span> <span class="n">TRANS_BATTERY_LOW</span>
+
+                <span class="c1"># if the robot has no low battery level and the controller node </span>
+                <span class="c1"># has finished to move the robot from one location to another, </span>
+                <span class="c1"># then take the new position tahnks to the get_results function</span>
+                <span class="c1"># and updates the robot time and position and also the visited </span>
+                <span class="c1"># location time, then go in the Wait state thanks to the TRANS_IN_A_ROOM</span>
+                <span class="c1"># if the battery level is not low. otherwise go in the Recharging state</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">controller_client</span><span class="o">.</span><span class="n">is_done</span><span class="p">():</span>
+
+                    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">controller_client</span><span class="o">.</span><span class="n">get_results</span><span class="p">()</span>
+                    <span class="n">new_location</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">final_location</span><span class="o">.</span><span class="n">name</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">update_robot_position</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">old_location</span><span class="p">),</span><span class="nb">str</span><span class="p">(</span><span class="n">new_location</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">update_robot_time</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">update_location_time</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">new_location</span><span class="p">))</span>
+
+                    <span class="c1"># activate the reasoner </span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">reasoner</span><span class="p">()</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">is_battery_low</span><span class="p">():</span>
+
+                        <span class="k">return</span> <span class="n">TRANS_BATTERY_LOW</span>
+                    
+                    <span class="k">else</span><span class="p">:</span>
+
+                        <span class="k">return</span> <span class="n">TRANS_IN_A_ROOM</span>
+                    
+            <span class="k">finally</span><span class="p">:</span>
+
+                <span class="c1"># Release the mutex to unblock the `self._interface` </span>
+                <span class="c1"># subscription threads if they are waiting.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+            <span class="c1"># Wait for a reasonably small amount of time to allow `self._interface` </span>
+            <span class="c1"># processing stimulus (eventually).</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">LOOP_SLEEP_TIME</span><span class="p">)</span></div></div>
+
+<span class="c1"># The definition of the recharging state.</span>
+<span class="c1"># It is the state where the robot recharges its battery</span>
+<span class="c1"># after it has reached the charging location</span>
+<div class="viewcode-block" id="Recharging"><a class="viewcode-back" href="../../index.html#scripts.state_machine.Recharging">[docs]</a><span class="k">class</span> <span class="nc">Recharging</span><span class="p">(</span><span class="n">State</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The definition of the recharging state.</span>
+<span class="sd">    It is the state where the robot recharges its battery</span>
+<span class="sd">    after it has reached the charging location.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Construct this class, i.e., initialize this state.</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">state_machine_interface</span><span class="p">):</span>
+
+        <span class="c1"># Get a reference to the interface with the other nodes of the architecture.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span> <span class="o">=</span> <span class="n">state_machine_interface</span>
+
+        <span class="c1"># Initialize this state with possible transitions (i.e., valid outputs of the `execute` function).</span>
+        <span class="n">State</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcomes</span><span class="o">=</span><span class="p">[</span><span class="n">TRANS_BATTERY_LOW</span><span class="p">,</span> <span class="n">TRANS_CHARGED_BATTERY</span><span class="p">,</span> 
+                                       <span class="n">TRANS_SEARCH_CHARG_LOC</span><span class="p">])</span>
+
+    
+
+    <span class="c1"># Define the function performed each time the state machine enter in this state,</span>
+    <span class="c1"># thanks to a proper transition.</span>
+<div class="viewcode-block" id="Recharging.execute"><a class="viewcode-back" href="../../index.html#scripts.state_machine.Recharging.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userdata</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function performed each time the state machine enter in the Recharging state.</span>
+<span class="sd">        This state checks if the robot is in the charging location. In case the robot is</span>
+<span class="sd">        in the charging location It sends to the Robot State node, the boolean flag &#39;found&#39;</span>
+<span class="sd">        (True value) through the /interafce/start_charging service, in order to say to the robot state</span>
+<span class="sd">        node that the charging process can begin because the robot is in the charging location.</span>
+<span class="sd">        otherwise, if the robot is not in the charging location, activate the low battery mode. </span>
+<span class="sd">        This is a mode that sets the Planning and the Moving state in order to search and reach only the</span>
+<span class="sd">        charging location.</span>
+<span class="sd">        Lastly, if the battery is recharged, the state variables (and flags) are reset and the found flag </span>
+<span class="sd">        is sent again to the robot state node (in order to reset also there the flag) then the state machine </span>
+<span class="sd">        comes back to the Planning node, through the &#39;charged_battery&#39; transition.</span>
+<span class="sd">        Instead, if the battery is still low and the charging location is not yet found (found flag is False)</span>
+<span class="sd">        then the state machine goes in the Planning mode, through the &#39;search_charging_location&#39; transition, </span>
+<span class="sd">        in order to compute a plan to reach the charging location.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get the current robot position</span>
+        <span class="n">robot_is</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">ask_rob_pos</span><span class="p">()</span>
+
+        <span class="c1"># if the robot is in the charging location </span>
+        <span class="c1"># then set the found flag to true and send it to the</span>
+        <span class="c1"># robot state node, in order to start the charging process</span>
+        <span class="c1"># (the change of state of the battery level managed in the robot state node)</span>
+        <span class="k">if</span> <span class="n">robot_is</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">charging_loc</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">set_starting_flag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">found</span><span class="p">)</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;The Robot is in the Charging Location.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">()</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTGREEN_EX</span> <span class="o">+</span> <span class="s2">&quot;...Wait for charging...&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>            
+
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># if the robot is not in the charging location,</span>
+              <span class="c1"># then activate the low battery mode, </span>
+              <span class="c1"># and starts to search the charging location</span>
+
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTCYAN_EX</span> <span class="o">+</span> <span class="s2">&quot;Searching the charging location mode...&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+            <span class="c1"># this flag is used to set the planning and </span>
+            <span class="c1"># moving states in the low battery mode and </span>
+            <span class="c1"># plan and move only toward the robot charging location</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">low_battery_mode</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Wait for stimulus from the other nodes of the architecture. </span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">rospy</span><span class="o">.</span><span class="n">is_shutdown</span><span class="p">():</span>  
+
+            <span class="c1"># Acquire the mutex to assure data consistencies with </span>
+            <span class="c1"># the ROS subscription threads managed by `self._interface`.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+
+            <span class="k">try</span><span class="p">:</span>
+
+                <span class="c1"># If the battery level is not low anymore, resets all </span>
+                <span class="c1"># the states variable (_battery_low, found, low_battery_mode)</span>
+                <span class="c1"># and send the updated found flag to rhe robot state node.</span>
+                <span class="c1"># Then return to the Planning state thanks to the TRANS_CHARGED_BATTERY</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">is_battery_low</span><span class="p">():</span>
+
+                    <span class="nb">print</span><span class="p">()</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">LIGHTCYAN_EX</span> <span class="o">+</span> <span class="s2">&quot;The battery is charged.&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">()</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">reset_states</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">set_starting_flag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">found</span><span class="p">)</span>
+
+                    <span class="k">return</span> <span class="n">TRANS_CHARGED_BATTERY</span>
+                
+                <span class="c1"># if the battery level is low and the robot has not </span>
+                <span class="c1"># yet reached the charging location, return to </span>
+                <span class="c1"># the Planning in order to search the charging location</span>
+                <span class="c1"># and compute a proper plan</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">is_battery_low</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">found</span><span class="p">:</span>
+
+                    <span class="k">return</span> <span class="n">TRANS_SEARCH_CHARG_LOC</span>
+                
+            <span class="k">finally</span><span class="p">:</span>
+
+                <span class="c1"># Release the mutex to unblock the `self._interface` </span>
+                <span class="c1"># subscription threads if they are waiting.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+            <span class="c1"># Wait for a reasonably small amount of time to allow</span>
+            <span class="c1"># `self._interface` processing stimulus (eventually).</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">LOOP_SLEEP_TIME</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="Wait"><a class="viewcode-back" href="../../index.html#scripts.state_machine.Wait">[docs]</a><span class="k">class</span> <span class="nc">Wait</span><span class="p">(</span><span class="n">State</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The definition of the wait state.</span>
+<span class="sd">    It is the state where is simulated that the robot </span>
+<span class="sd">    is doing something in the reached location</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Construct this class, i.e., initialize this state.</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">state_machine_interface</span><span class="p">):</span>
+
+        <span class="c1"># Get a reference to the interface with the other nodes of the architecture.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span> <span class="o">=</span> <span class="n">state_machine_interface</span>
+
+        <span class="c1"># Initialize this state with possible transitions (i.e., valid outputs of the `execute` function).</span>
+        <span class="n">State</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcomes</span><span class="o">=</span><span class="p">[</span><span class="n">TRANS_TIMEOUT</span><span class="p">,</span> <span class="n">TRANS_BATTERY_LOW</span><span class="p">,</span> <span class="n">TRANS_IN_A_ROOM</span><span class="p">])</span>
+
+    <span class="c1"># Define the function performed each time the state machine enter in this state,</span>
+    <span class="c1"># thanks to a proper transition.</span>
+<div class="viewcode-block" id="Wait.execute"><a class="viewcode-back" href="../../index.html#scripts.state_machine.Wait.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">userdata</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function performed each time the state machine enter in the Wait state.</span>
+<span class="sd">        If the battery is not low, this state simply use a busy wait to simulate that the</span>
+<span class="sd">        robot is doing something, after this waiting time the state machine goes back to</span>
+<span class="sd">        the Planning state.</span>
+<span class="sd">        if the battery is low, the state machine goes in the Recharging state</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># get the waiting time from the ros parameter server</span>
+        <span class="n">waiting_time</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">get_param</span><span class="p">(</span><span class="s2">&quot;/waiting_time&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Wait for stimulus from the other nodes of the architecture.</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">rospy</span><span class="o">.</span><span class="n">is_shutdown</span><span class="p">():</span>  
+
+            <span class="c1"># Acquire the mutex to assure data consistencies with </span>
+            <span class="c1"># the ROS subscription threads managed by `self._interface`.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+
+            <span class="k">try</span><span class="p">:</span>
+
+                <span class="c1"># If the battery level is low, go in the </span>
+                <span class="c1"># Recharging state thanks to the TRANS_BATTERY_LOW.</span>
+                <span class="c1"># Otherwise, simulate that the robot is doing something</span>
+                <span class="c1"># using a waiting time. Once this waiting time is expired</span>
+                <span class="c1"># go in the Planning state through the TRANS_TIMEOUT</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">is_battery_low</span><span class="p">():</span>
+
+                    <span class="k">return</span> <span class="n">TRANS_BATTERY_LOW</span>
+                
+                <span class="k">else</span><span class="p">:</span>
+
+                    <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">CYAN</span> <span class="o">+</span> <span class="s2">&quot;...WAITING...&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">Fore</span><span class="o">.</span><span class="n">WHITE</span><span class="p">)</span>
+
+                    <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">waiting_time</span><span class="p">)</span>
+
+                    <span class="k">return</span> <span class="n">TRANS_TIMEOUT</span>
+                
+            <span class="k">finally</span><span class="p">:</span>
+
+                <span class="c1"># Release the mutex to unblock the `self._interface` </span>
+                <span class="c1"># subscription threads if they are waiting.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_interface</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+            <span class="c1"># Wait for a reasonably small amount of time to allow </span>
+            <span class="c1"># `self._interface` processing stimulus (eventually).</span>
+            <span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">LOOP_SLEEP_TIME</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../index.html#scripts.state_machine.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is the main function, in which the state machine is initialised,</span>
+<span class="sd">    configured and run. The Introspection Server is also started to allow the</span>
+<span class="sd">    state machine to be visualised via the `ROS SMACH library &lt;http://wiki.ros.org/smach&gt;`_.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Initialize this ROS node.</span>
+    <span class="n">rospy</span><span class="o">.</span><span class="n">init_node</span><span class="p">(</span><span class="s1">&#39;state_machine_russo_gabriele&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Initialize an interface class to manage the </span>
+    <span class="c1"># interfaces with the other nodes in the architectures.</span>
+    <span class="n">interface</span> <span class="o">=</span> <span class="n">Handler</span><span class="p">()</span>
+
+    <span class="c1"># Define the structure of the Finite State Machine.</span>
+    <span class="n">sm</span> <span class="o">=</span> <span class="n">StateMachine</span><span class="p">(</span><span class="n">outcomes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;container_interface&#39;</span><span class="p">])</span>
+    <span class="n">sm</span><span class="o">.</span><span class="n">userdata</span><span class="o">.</span><span class="n">sm_counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">with</span> <span class="n">sm</span><span class="p">:</span>
+
+        <span class="c1"># Define the inner state to create, set and load the map.</span>
+        <span class="n">StateMachine</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">STATE_WAIT_FOR_TOP_MAP</span><span class="p">,</span> <span class="n">WaitForTopMap</span><span class="p">(</span><span class="n">interface</span><span class="p">),</span>
+                            <span class="n">transitions</span><span class="o">=</span><span class="p">{</span><span class="n">TRANS_NO_TOP_MAP</span><span class="p">:</span> <span class="n">STATE_WAIT_FOR_TOP_MAP</span><span class="p">,</span>
+                                        <span class="n">TRANS_TOP_MAP_READY</span><span class="p">:</span> <span class="n">STATE_PLANNING</span><span class="p">})</span>
+
+        <span class="c1"># Define the inner state to plan the next position.</span>
+        <span class="n">StateMachine</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">STATE_PLANNING</span><span class="p">,</span> <span class="n">Planning</span><span class="p">(</span><span class="n">interface</span><span class="p">),</span>
+                            <span class="n">transitions</span><span class="o">=</span><span class="p">{</span><span class="n">TRANS_TOP_MAP_READY</span><span class="p">:</span> <span class="n">STATE_PLANNING</span><span class="p">,</span>
+                                        <span class="n">TRANS_MOVING</span><span class="p">:</span> <span class="n">STATE_MOVING</span><span class="p">,</span>
+                                        <span class="n">TRANS_CHARGED_BATTERY</span><span class="p">:</span> <span class="n">STATE_PLANNING</span><span class="p">,</span>
+                                        <span class="n">TRANS_BATTERY_LOW</span><span class="p">:</span> <span class="n">STATE_RECHARGING</span><span class="p">,</span>
+                                        <span class="n">TRANS_SEARCH_CHARG_LOC</span><span class="p">:</span> <span class="n">STATE_PLANNING</span><span class="p">,</span>
+                                        <span class="n">TRANS_TIMEOUT</span><span class="p">:</span> <span class="n">STATE_PLANNING</span><span class="p">})</span>
+        
+        <span class="c1"># Define the inner state to move to the target location.</span>
+        <span class="n">StateMachine</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">STATE_MOVING</span><span class="p">,</span> <span class="n">Moving</span><span class="p">(</span><span class="n">interface</span><span class="p">),</span>
+                            <span class="n">transitions</span><span class="o">=</span><span class="p">{</span><span class="n">TRANS_BATTERY_LOW</span><span class="p">:</span> <span class="n">STATE_RECHARGING</span><span class="p">,</span>
+                                        <span class="n">TRANS_MOVING</span><span class="p">:</span> <span class="n">STATE_MOVING</span><span class="p">,</span>
+                                        <span class="n">TRANS_IN_A_ROOM</span><span class="p">:</span> <span class="n">STATE_WAIT</span><span class="p">})</span>
+
+        <span class="c1"># Define the inner state to simulate that the robot is doing something.</span>
+        <span class="n">StateMachine</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">STATE_WAIT</span><span class="p">,</span> <span class="n">Wait</span><span class="p">(</span><span class="n">interface</span><span class="p">),</span>
+                            <span class="n">transitions</span><span class="o">=</span><span class="p">{</span><span class="n">TRANS_TIMEOUT</span><span class="p">:</span> <span class="n">STATE_PLANNING</span><span class="p">,</span>
+                                        <span class="n">TRANS_BATTERY_LOW</span><span class="p">:</span> <span class="n">STATE_RECHARGING</span><span class="p">,</span>
+                                        <span class="n">TRANS_IN_A_ROOM</span><span class="p">:</span> <span class="n">STATE_WAIT</span><span class="p">})</span>
+
+        <span class="c1"># Define the inner state to recharge the robot battery.</span>
+        <span class="n">StateMachine</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">STATE_RECHARGING</span><span class="p">,</span> <span class="n">Recharging</span><span class="p">(</span><span class="n">interface</span><span class="p">),</span>
+                            <span class="n">transitions</span><span class="o">=</span><span class="p">{</span><span class="n">TRANS_CHARGED_BATTERY</span><span class="p">:</span> <span class="n">STATE_PLANNING</span><span class="p">,</span>
+                                         <span class="n">TRANS_BATTERY_LOW</span><span class="p">:</span> <span class="n">STATE_RECHARGING</span><span class="p">,</span>
+                                         <span class="n">TRANS_SEARCH_CHARG_LOC</span><span class="p">:</span> <span class="n">STATE_PLANNING</span><span class="p">})</span>
+
+    <span class="c1"># Create and start the introspection server for visualizing the finite state machine.</span>
+    <span class="n">intro_server</span> <span class="o">=</span> <span class="n">smach_ros</span><span class="o">.</span><span class="n">IntrospectionServer</span><span class="p">(</span><span class="s1">&#39;intro_server&#39;</span><span class="p">,</span> <span class="n">sm</span><span class="p">,</span> <span class="s1">&#39;/SM_ROOT&#39;</span><span class="p">)</span>
+    <span class="n">intro_server</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="c1"># Execute the state machine. Note that the `outcome` value of the main Finite State Machine is not used.</span>
+    <span class="n">outcome</span> <span class="o">=</span> <span class="n">sm</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+
+    <span class="c1"># Wait for ctrl-c to stop the application</span>
+    <span class="n">rospy</span><span class="o">.</span><span class="n">spin</span><span class="p">()</span>
+    <span class="n">intro_server</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
+
+
+<span class="c1"># The function that get executed at start time.</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>  <span class="c1"># Initialize and start the ROS node.</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Gabriele Russo.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
