@@ -2,17 +2,20 @@
 
 ### Action Server Goal
 
-# The point to be reached at the of the plan.
+# The final location to be reached in the plan.
+
 Location target
 
 ---
 
 ### Action Server Result
 
-# The plan, i.e., the `via_points` to reach the `target` given the current position.
+# The plan, the list of location to reach the `target` given the current position.
+
 Location[] plan
 
 ---
 
 ### Action Server Feedback
+
 Location[] plan
