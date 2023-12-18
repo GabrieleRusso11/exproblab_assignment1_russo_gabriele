@@ -6,6 +6,7 @@
 
         <param name = "starting_map"            type = "str"           value = "/topological_map.owl"  />
         <param name = "operative_map"           type = "str"           value = "test1.owl"             />
+        
         <param name = "charging station"        type = "str"           value = "E"                     />
         <param name = "location_property"       type = "str"           value = "hasDoor"               />
         <param name = "robot_property"          type = "str"           value = "isIn"                  />
@@ -17,7 +18,7 @@
         <param name = "robot_name"              type = "str"           value = "Robot1"                />
         <param name = "waiting_time"            type = "int"           value = "10"                    />
         <param name = "planning_time"           type = "int"           value = "2"                     />
-        <param name = "moving_time"            type = "int"           value = "10"                    />
+        <param name = "moving_time"             type = "int"           value = "5"                     />
         <param name = "battery_time"            type = "int"           value = "100"                   />
         <param name = "charging_location"       type = "str"           value = "E"                     />
         
@@ -25,28 +26,28 @@
         type = "robot_state.py"
         name = "robot_state"
         output = "screen"
-        launch-prefix="gnome-terminal -e"
+        launch-prefix="gnome-terminal --title=Robot_State -e"
         > </node>
 
         <node pkg = "exproblab_assignment1_russo_gabriele"  
         type = "state_machine.py"
         name = "state_machine"
         output = "screen"
-        launch-prefix="gnome-terminal -e"
+        launch-prefix="gnome-terminal --title=State_Machine -e"
         > </node>
 
         <node pkg = "exproblab_assignment1_russo_gabriele"  
         type = "planner.py"
         name = "planner"
         output = "screen"
-        launch-prefix="gnome-terminal -e"
+        launch-prefix="gnome-terminal --title=Planner -e"
         > </node>
 
         <node pkg = "exproblab_assignment1_russo_gabriele"  
         type = "controller.py"
         name = "Controller"
         output = "screen"
-        launch-prefix="gnome-terminal -e"
+        launch-prefix="gnome-terminal --title=Controller -e"
         > </node>
 
 </launch>
