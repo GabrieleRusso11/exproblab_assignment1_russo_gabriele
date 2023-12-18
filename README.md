@@ -127,9 +127,13 @@ Then in the workspace src folder clone this repository :
 
 `git clone https://github.com/GabrieleRusso11/exproblab_assignment1_russo_gabriele.git`
 
-and the repository with the starting ontology:
+Then go in the exproblab_assignment1_russo_gabriele folder and clone this repository for the ontology:
 
 `git clone https://github.com/buoncubi/topological_map`
+
+Lastly run:
+
+`catkin_make`
 
 In order to run this project, go in the workspace and launch the launch file:
 
