@@ -11,8 +11,21 @@ The code of this assignment has been developed using as landmark the [arch_skele
 ![Assignment environment](https://github.com/GabrieleRusso11/exproblab_assignment1_russo_gabriele/blob/main/media/assignment_map.png)
 
 ## Software Architecture
-### temporal diagram and states diagram
+### component diagram
+
+![Component diagram](https://github.com/GabrieleRusso11/exproblab_assignment1_russo_gabriele/blob/main/media/assignment1_component_diagram.png)
+
+### state diagram
+
+![State diagram](https://github.com/GabrieleRusso11/exproblab_assignment1_russo_gabriele/blob/main/media/state_diagram_1.png)
+
+### temporal diagram
+
+![temporal diagram](https://github.com/GabrieleRusso11/exproblab_assignment1_russo_gabriele/blob/main/media/temporal_diagram_1.png)
+
 ### list of ros messages and parameters
+
+## Installation and running procedure(including all the steps to display the robot’s behavior).
 
 ## A commented small video, a GIF, or screenshots showing the relevant parts of the running code.
 
